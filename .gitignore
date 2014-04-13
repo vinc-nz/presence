@@ -1,0 +1,7 @@
+*venv
+db.*
+*.log
+*.pyc
+*\~
+.pydevproject
+.project
