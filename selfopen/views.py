@@ -15,13 +15,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from django.shortcuts import render
+from datetime import timedelta
 from django.contrib.auth.decorators import login_required
-from threading import Thread
-import modem
+from django.shortcuts import render
+from selfopen.models import Request
+import logging
 
 # import the logging library
-import logging
 
 # Get an instance of a logger
 logger = logging.getLogger('presence')
@@ -31,10 +31,17 @@ WAIT_TIMEOUT = 60
 # Create your views here.
 @login_required
 def wait_ring(request):
-    logger.info('%s requested access' % request.user.username)
-    thread = Thread(target = modem.test, args = (WAIT_TIMEOUT, ) )
-    logger.debug('starting modem thread')
-    thread.start()
-    logger.debug('modem thread started')
-    return render(request, 'selfopen/waiting.html', {'timeout' : WAIT_TIMEOUT})
+    logger.info('USER %s REQUESTS ACCESS' % request.user.username)
+    
+    if Request.objects.pending_request_present(timedelta(seconds=WAIT_TIMEOUT)):
+        logger.info('request from %s accepted' % request.user.username )
+        selfopen_request = Request.objects.create(request.user)
+        if selfopen_request.setup(WAIT_TIMEOUT):
+            selfopen_request.fullfill()
+            return render(request, 'selfopen/waiting.html', {'timeout' : WAIT_TIMEOUT})
+        else:
+            return render(request, 'selfopen/error.html')
+    else:
+        return render(request, 'selfopen/concurrency.html')
+    
     
