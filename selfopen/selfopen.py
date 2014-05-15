@@ -50,6 +50,7 @@ class AtlantisModemController(ControllerSkeleton, threading.Thread):
     INIT_COMMANDS = ('at\r', 'atz\r', 'atx3\r', 'ats11=60\r', 'ats0=0\r')
     
     def __init__(self, serial_factory_method=_get_serial):
+        super(AtlantisModemController, self).__init__()
         self._get_serial = serial_factory_method
         self._success = False
     
@@ -81,7 +82,7 @@ class AtlantisModemController(ControllerSkeleton, threading.Thread):
         return True
     
     def run(self):
-        logger.debug( 'modem in ascolto' )
+        logger.debug( 'modem in listen mode' )
     
         lineIn = self.serial.read(len(AtlantisModemController.MSG_RING))
         if lineIn == AtlantisModemController.MSG_RING:
@@ -90,6 +91,7 @@ class AtlantisModemController(ControllerSkeleton, threading.Thread):
             self.serial.write(AtlantisModemController.MSG_OPEN)
             while lineIn != AtlantisModemController.MSG_BUSY and len(lineIn) > 0:
                 lineIn = self.serial.readline()
+                logger.debug( 'modem: %s' % lineIn )
             if lineIn == AtlantisModemController.MSG_BUSY:
                 logger.info( 'door opened' )
                 self._success = True
