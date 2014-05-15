@@ -1,11 +1,12 @@
 from datetime import datetime
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
-from selfopen.selfopen import DoorController
+import selfopen
 
 
-controller_class = DoorController
+controller_class = getattr(settings, 'CONTROLLER_CLASS', selfopen.AtlantisModemController)
 
 
 class RequestManager(models.Manager):
@@ -26,7 +27,7 @@ class RequestManager(models.Manager):
 class Request(models.Model):
     user = models.ForeignKey(User)
     req_time = models.DateTimeField()
-    objects = RequestManager
+    objects = RequestManager()
     
     def set_controller(self, controller):
         self.controller = controller

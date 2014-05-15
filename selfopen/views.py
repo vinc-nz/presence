@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from selfopen.models import Request
+from models import Request
 import logging
 
 # import the logging library
@@ -33,7 +33,7 @@ WAIT_TIMEOUT = 60
 def wait_ring(request):
     logger.info('USER %s REQUESTS ACCESS' % request.user.username)
     
-    if Request.objects.pending_request_present(timedelta(seconds=WAIT_TIMEOUT)):
+    if not Request.objects.pending_request_present(timedelta(seconds=WAIT_TIMEOUT)):
         logger.info('request from %s accepted' % request.user.username )
         selfopen_request = Request.objects.create(request.user)
         if selfopen_request.setup(WAIT_TIMEOUT):
