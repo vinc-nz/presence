@@ -16,9 +16,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from django.shortcuts import render
-from checker import check
+from django.conf import settings
+import checker
 
-# Create your views here.
+check = getattr(settings, 'CHECKER_FUNCTION', checker.rpi_gpio_check)
+
 def door_status(request):
     status = 'Aperto' if check() else 'Chiuso'
     return render(request, 'checker/status.html', {'status' : status })

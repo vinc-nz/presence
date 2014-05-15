@@ -2,3 +2,4 @@ Django==1.6.2
 argparse==1.2.1
 pyserial==2.7
 wsgiref==0.1.2
+RPi.GPIO==0.5.5

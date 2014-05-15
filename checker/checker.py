@@ -15,7 +15,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-def check():
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BOARD)
+LOCK_PIN=8
+GPIO.setup(LOCK_PIN, GPIO.IN) 
+
+def rpi_gpio_check():
     #stub
+    #shoud return True if door is open, false otherwise
+    return GPIO.input(LOCK_PIN)
+
+
+def stub_check():
     #shoud return True if door is open, false otherwise
     return False
