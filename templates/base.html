@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <title>HLCS Presence | {% block title %}{% endblock %}</title>
+    <style type="text/css">
+    	#content {
+    		width: 288px;
+    		margin: auto;
+    	}
+    </style>
+    {% block script %}{% endblock %}
+    {% block extrastyle %}{% endblock %}
+</head>
+
+<body>
+
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+    
+</body>
+</html>

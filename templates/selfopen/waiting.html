@@ -1,35 +1,29 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>HLCS Presence | Modem in attesa</title>
+{% extends "base.html" %}
+
+{% block title %}Modem in attesa{% endblock %}
+
+{% block script %}
+
 <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
 <script type="text/javascript">
 var start = new Date;
 var timeout = "{{ timeout }}";
-var text = "Hai %s secondi per suonare";
-
-$(document).ready(function(){
-
-	$('.end').hide();
-
-}); 
-
 
 
 setInterval(function() {
 	var timer = timeout - Math.round((new Date - start) / 1000);
 	if (timer > 0)
-    	$('.timer').text(text.replace("%s", timer));
+    	$('.timer').text(timer);
 	else {
-		$('.end').show();
-		$('.timer').hide();
+		$('.timer').text(":-(");
+		$('.caption').text("Tempo scaduto")
 	}
 }, 1000);
 </script>
-</head>
-<body>
-<span class="timer"></span>
-<span class="end">Tempo scaduto</span>
-</body>
-</html>
+
+{% endblock %}
+
+{% block content %}
+<h4 class="caption" style="text-align:center;">Tempo per suonare</h4>
+<h1 class="timer" style="text-align:center;"></h1>
+{% endblock %}
