@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'selfopen',
+    'checker',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -116,3 +117,10 @@ LOGGING = {
         },
     },
 }
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
+
+

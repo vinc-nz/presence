@@ -40,7 +40,7 @@ def wait_ring(request):
             selfopen_request.fullfill()
             return render(request, 'selfopen/waiting.html', {'timeout' : WAIT_TIMEOUT})
         else:
-            return render(request, 'selfopen/error.html')
+            return render(request, 'error.html')
     else:
         return render(request, 'selfopen/concurrency.html')
     

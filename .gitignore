@@ -5,3 +5,4 @@ db.*
 *\~
 .pydevproject
 .project
+local_settings.py

@@ -22,6 +22,9 @@ import checker
 check = getattr(settings, 'CHECKER_FUNCTION', checker.rpi_gpio_check)
 
 def door_status(request):
-    status = 'Aperto' if check() else 'Chiuso'
-    return render(request, 'checker/status.html', {'status' : status })
+    try:
+        status = 'Aperto' if check() else 'Chiuso'
+        return render(request, 'checker/status.html', {'status' : status })
+    except Exception:
+        return render(request, 'error.html')
     
