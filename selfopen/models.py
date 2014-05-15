@@ -1,4 +1,3 @@
-from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -18,7 +17,7 @@ class RequestManager(models.Manager):
         return r
     
     def pending_request_present(self, timedelta):
-        time_threshold = datetime.now() - timedelta
+        time_threshold = timezone.now() - timedelta
         results = self.filter(req_time__gt=time_threshold)
         return True if len(results) > 0 else False
         
