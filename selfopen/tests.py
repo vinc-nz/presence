@@ -1,8 +1,13 @@
+
+from selfopen import AtlantisModemController, ControllerSkeleton
+from django.conf import settings
+
+setattr(settings, 'CONTROLLER_CLASS', ControllerSkeleton)
+
 from datetime import timedelta
 from django.contrib.auth.models import User
 from django.test import TestCase
 from models import Request
-from selfopen import AtlantisModemController
 import time
 
 class FakeSerial:
