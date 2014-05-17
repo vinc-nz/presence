@@ -58,12 +58,8 @@ class AtlantisModemController(ControllerSkeleton, threading.Thread):
         ControllerSkeleton.setup(self, timeout=timeout)
         
         logger.debug( 'opening serial port..' )
-        try:
-            self.serial = self._get_serial()
-            self.serial.setTimeout(timeout)
-        except Exception:
-            logger.error( 'error opening serial')
-            return False
+        self.serial = self._get_serial()
+        self.serial.setTimeout(timeout)
         
         logger.debug( 'flushing buffers' )
         self.serial.flushInput()
@@ -74,12 +70,11 @@ class AtlantisModemController(ControllerSkeleton, threading.Thread):
             self.serial.write(c)
             self.serial.readline() #echo
             if self.serial.readline() != AtlantisModemController.MSG_OK:
-                logger.error( 'error at comand: %s' % c )
+                #logger.error( 'error at comand: %s' % c )
                 self.serial.close()
-                return False
+                raise IOError( 'error at comand: %s' % c )
             
         logger.debug('setup complete, controller in listen mode')
-        return True
     
     def run(self):
         logger.debug( 'modem in listen mode' )

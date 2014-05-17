@@ -65,7 +65,7 @@ class TestApp(TestCase):
         
     def testAtlantisModemController(self):
         c = AtlantisModemController(get_fake_serial)
-        self.assertTrue(c.setup(1))
+        c.setup(1)
         c.run()
         self.assertTrue(c._success)
         

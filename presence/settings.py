@@ -122,9 +122,7 @@ LOGGING = {
 
 try:
     from local_settings import *
-    print 'local_settings has been imported'
 except ImportError:
-    print 'no local_settings found'
     pass
 
 

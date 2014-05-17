@@ -15,23 +15,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from django.shortcuts import render
 from django.conf import settings
-import checker
-import logging
+from django.shortcuts import render
+import checker, logging, json
+from django.http.response import HttpResponse
 
-# import the logging library
 
-# Get an instance of a logger
 logger = logging.getLogger('presence')
 
 check = getattr(settings, 'CHECKER_FUNCTION', checker.rpi_gpio_check)
 
-def door_status(request):
-    try:
-        status = 'Aperto' if check() else 'Chiuso'
-        return render(request, 'checker/status.html', {'status' : status })
-    except Exception as e:
-        logger.error(e)
-        return render(request, 'error.html')
+def json_status(request):
+    response = {'status' : 'Open' if check() else 'Closed' }
+    return HttpResponse(json.dumps(response), content_type='application/json')
+    
+
+def html_status(request):
+    status = 'Aperto' if check() else 'Chiuso'
+    return render(request, 'checker/status.html', {'status' : status })
+    
     

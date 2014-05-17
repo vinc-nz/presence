@@ -18,17 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.conf import settings
 from models import Request
 import logging
 
-# import the logging library
 
-# Get an instance of a logger
 logger = logging.getLogger('presence')
 
-WAIT_TIMEOUT = 60
+WAIT_TIMEOUT = getattr(settings, 'WAIT_TIMEOUT', 60)
 
-# Create your views here.
 @login_required
 def wait_ring(request):
     logger.info('USER %s REQUESTS ACCESS' % request.user.username)
@@ -36,11 +34,9 @@ def wait_ring(request):
     if not Request.objects.pending_request_present(timedelta(seconds=WAIT_TIMEOUT)):
         logger.info('request from %s accepted' % request.user.username )
         selfopen_request = Request.objects.create(request.user)
-        if selfopen_request.setup(WAIT_TIMEOUT):
-            selfopen_request.fullfill()
-            return render(request, 'selfopen/waiting.html', {'timeout' : WAIT_TIMEOUT})
-        else:
-            return render(request, 'error.html')
+        selfopen_request.setup(WAIT_TIMEOUT)
+        selfopen_request.fullfill()
+        return render(request, 'selfopen/waiting.html', {'timeout' : WAIT_TIMEOUT})
     else:
         return render(request, 'selfopen/concurrency.html')
     

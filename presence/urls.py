@@ -13,5 +13,6 @@ urlpatterns = patterns('',
     url(r'^admin', include(admin.site.urls)),
     url(r'^open', 'selfopen.views.wait_ring', name='open'),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
-    url(r'^', 'checker.views.door_status', name='status')
+    url(r'^api/status', 'checker.views.json_status'),
+    url(r'^', 'checker.views.html_status', name='status'),
 ) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
