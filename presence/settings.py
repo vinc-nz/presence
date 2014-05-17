@@ -85,6 +85,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = ( os.path.join(BASE_DIR, 'static'), )
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -120,7 +122,9 @@ LOGGING = {
 
 try:
     from local_settings import *
+    print 'local_settings has been imported'
 except ImportError:
+    print 'no local_settings found'
     pass
 
 

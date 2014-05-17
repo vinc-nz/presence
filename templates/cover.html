@@ -1,0 +1,57 @@
+
+{% extends "base.html" %}
+
+ {% load staticfiles %}
+
+{% block extrastyle %}
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'bootstrap/css/cover.css' %}" rel="stylesheet">
+    
+{% endblock %}
+    
+
+{% block body %}
+
+    <div class="site-wrapper">
+
+      <div class="site-wrapper-inner">
+
+        <div class="cover-container">
+
+          <div class="masthead clearfix">
+            <div class="inner">
+              <h3 class="masthead-brand">HLCS</h3>
+              <ul class="nav masthead-nav">
+                <li class="active"><a href="{% url 'status' %}">Stato</a></li>
+                <li><a href="{% url 'open' %}">Apri</a></li>
+                <li><a href="/admin">Admin</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="inner cover">
+            <h1 class="cover-heading">{% block cover-heading %}Cover your page.{% endblock %}</h1>
+            <p class="lead">{% block lead %}{% endblock %}</p>
+            {% block button %}
+<!--             <p class="lead"> -->
+<!--               <a href="#" class="btn btn-lg btn-default">Learn more</a> -->
+<!--             </p> -->
+			{% endblock %}
+          </div>
+
+<!--           <div class="mastfoot"> -->
+<!--             <div class="inner"> -->
+<!--               <p>Cover template for <a href="http://getbootstrap.com">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo</a>.</p> -->
+<!--             </div> -->
+<!--           </div> -->
+
+        </div>
+
+      </div>
+
+    </div>
+    
+{% endblock %}
+
+
