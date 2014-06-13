@@ -5,6 +5,9 @@
 {% block content %}
 
 <h1>{{ status }}</h1>
+{% if status == "Aperto" %}
 <p>Siamo <strong>aperti</strong>? Fantastico!</p>
-<p>Suona l'interno "<strong>Sinope</strong>" e ti apriamo :)</p>
+<p>Suona l'interno "<strong>Sinope</strong>" (*) e ti apriamo :)</p>
+<small>(*) Tenere premuto fino a che non sentirete John Lennon.</small>
+{% endif %}
 {% endblock %}
