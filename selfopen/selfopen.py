@@ -47,7 +47,7 @@ class AtlantisModemController(ControllerSkeleton, threading.Thread):
     PORT = '/dev/ttyUSB0'
     BAUDRATE = 115200
     
-    INIT_COMMANDS = ('at\r', 'atz\r', 'atx3\r', 'ats11=60\r', 'ats0=0\r')
+    INIT_COMMANDS = ('at\r', 'atz\r', 'at*nc9\r', 'atx3\r', 'ats11=60\r', 'ats0=0\r')
     
     def __init__(self, serial_factory_method=_get_serial):
         super(AtlantisModemController, self).__init__()
