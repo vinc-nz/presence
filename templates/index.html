@@ -1,0 +1,82 @@
+ {% extends "base.html" %} {% load staticfiles %} {% block extrastyle %}
+
+<!-- Custom styles for this template -->
+<link href="{% static 'bootstrap/css/cover.css' %}" rel="stylesheet">
+
+{% endblock %} {% block script %}
+
+<script type="text/javascript">
+
+    function setClosedHeading() {
+    	$(".cover-heading").text("Chiuso");
+    	$("#info").hide();
+    }
+    
+    function setOpenHeading() {
+    	$(".cover-heading").text("Aperto");
+    	$("#info").show();
+    }
+
+	function update() {
+		$.ajax({
+			url : "{% url 'control' 'internal' %}",
+			type : 'GET',
+			dataType : 'json',
+			success : function(response) {
+				if (response.value == 1)
+					setOpenHeading();
+				else
+					setClosedHeading();
+			},
+			error : function(xhr, status) {
+				setClosedHeading();
+			}
+
+		});
+	}
+	
+	$(document).ready(function(){
+		setClosedHeading();
+		update();
+		setInterval(update, 5000);
+	});
+</script>
+
+{% endblock %} {% block body %}
+
+<div class="site-wrapper">
+
+	<div class="site-wrapper-inner">
+
+		<div class="cover-container">
+
+			<div class="masthead clearfix">
+				<div class="inner">
+					<h3 class="masthead-brand">HLCS</h3>
+					<ul class="nav masthead-nav">
+						<li><a href="/accounts/login/?next=/">Log In</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="inner cover">
+				<h1 class="cover-heading"></h1>
+				<p class="lead"></p>
+				<div id="info">
+					<p>Siamo <strong>aperti</strong>? Fantastico!</p>
+				    <p>Suona l'interno "<strong>Sinope</strong>" (*) e ti apriamo :)</p>
+				    <p><small>(*) Tenere premuto fino a che non sentirete John Lennon.</small></p>
+               </div>
+            
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+    
+{% endblock %}
+
+

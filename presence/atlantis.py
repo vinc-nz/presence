@@ -15,29 +15,62 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import serial, logging, threading
+import threading, time
+
+import serial, logging
+from django.conf import settings
+
 
 # Get an instance of a logger
 logger = logging.getLogger('presence')
 
 
 
-class ControllerSkeleton:
+class FakeSerial:
     
-    def setup(self, timeout=60):
-        self.timeout = timeout
-        logger.debug('setting up door controller')
-        return True
-
-    def selfopen(self):
-        logger.debug('starting opening routine')
+    def __init__(self):
+        self.last_command = None
+        self.next_output = None
+    
+    def flushInput(self):
+        pass
+    
+    def flushOutput(self):
+        pass
+    
+    def close(self):
+        pass
+    
+    def setTimeout(self, timeout):
+        pass
+    
+    def write(self, command):
+        self.last_command = command
+        
+    def read(self, dontcare):
+        time.sleep(10)
+        return AtlantisModemController.MSG_RING
+        
+    def readline(self):
+        if self.last_command in AtlantisModemController.INIT_COMMANDS:
+            self.next_output = AtlantisModemController.MSG_OK 
+        elif self.last_command == AtlantisModemController.MSG_OPEN:
+            self.next_output = AtlantisModemController.MSG_BUSY
+        if self.last_command is not None:
+            self.last_command = None
+            return 'echo'
+        else:
+            return self.next_output
+        
 
 
 def _get_serial():
     return serial.Serial(AtlantisModemController.PORT, baudrate=AtlantisModemController.BAUDRATE)
 
+def stub_serial():
+    return FakeSerial()
     
-class AtlantisModemController(ControllerSkeleton, threading.Thread):
+class AtlantisModemController(threading.Thread):
     
     MSG_OK =  'OK\r\n'
     MSG_RING = '\r\nRING\r\n'
@@ -49,13 +82,11 @@ class AtlantisModemController(ControllerSkeleton, threading.Thread):
     
     INIT_COMMANDS = ('at\r', 'atz\r', 'at*nc9\r', 'atx3\r', 'ats11=60\r', 'ats0=0\r')
     
-    def __init__(self, serial_factory_method=_get_serial):
-        super(AtlantisModemController, self).__init__()
-        self._get_serial = serial_factory_method
-        self._success = False
     
-    def setup(self, timeout=60):
-        ControllerSkeleton.setup(self, timeout=timeout)
+    def setup(self, request, timeout=60):
+        
+        self.request = request
+        self._get_serial = getattr(settings, 'SERIAL_FACTORY_METHOD', _get_serial)
         
         logger.debug( 'opening serial port..' )
         self.serial = self._get_serial()
@@ -86,21 +117,22 @@ class AtlantisModemController(ControllerSkeleton, threading.Thread):
             self.serial.write(AtlantisModemController.MSG_OPEN)
             while lineIn != AtlantisModemController.MSG_BUSY and len(lineIn) > 0:
                 lineIn = self.serial.readline()
-                logger.debug( 'modem: %s' % lineIn )
+                logger.debug( 'modem: %s' % lineIn.rstrip() )
             if lineIn == AtlantisModemController.MSG_BUSY:
                 logger.info( 'door opened' )
-                self._success = True
+                self.request.done()
             else:
-                logger.error('unknow error, doing nothing')
+                msg = 'invalid input: %s' % lineIn.rstrip()
+                logger.error( msg )
+                self.request.info = msg
         else:
-            logger.debug( 'invalid input: %s' % lineIn )
+            msg = 'no RING received'
+            logger.debug( msg )
+            self.request.fail(msg)
         
         logger.debug( 'closing serial port' )
         self.serial.close()
         
-    def selfopen(self):
-        ControllerSkeleton.selfopen(self)
-        self.start()
         
         
     

@@ -8,9 +8,11 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="static/favicon.ico">
     
-    <title>HLCS Presence | {% block title %}{% endblock %}</title>
+     {% load staticfiles %}
     
-    {% load staticfiles %}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    
+    <title>HLCS Presence | {% block title %}{% endblock %}</title>
     
     <!-- Bootstrap core CSS -->
     <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
@@ -32,7 +34,6 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'bootstrap/js/docs.min.js' %}"></script>
     

@@ -16,7 +16,7 @@
 
     <div class="container">
 
-      <form class="form-signin" role="form" action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+      <form class="form-signin" role="form" action="{% url 'login' %}" method="post" id="login-form">{% csrf_token %}
         <h2 class="form-signin-heading">HLCS Presence</h2>
         <input name="username" type="text" class="form-control" placeholder="Username" required autofocus>
         <input name="password" type="password" class="form-control" placeholder="Password" required>

@@ -1,7 +1,5 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.conf import settings
-from django.conf.urls.static import static
 
 admin.autodiscover()
 
@@ -11,8 +9,10 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin', include(admin.site.urls)),
-    url(r'^open', 'selfopen.views.wait_ring', name='open'),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
-    url(r'^api/status', 'checker.views.json_status'),
-    url(r'^', 'checker.views.html_status', name='status'),
-) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', name='logout'),
+    url(r'^gates/(?P<gate_name>\w{0,50})/$', 'gatecontrol.views.gatecontrol', name='control'),
+    url(r'^gates/$', 'gatecontrol.views.get_all_states', name='gates'),
+    url(r'^requests/$', 'gatecontrol.views.show_requests', name='requests'),
+    url(r'^', 'gatecontrol.views.homepage', name='home'),
+) 
