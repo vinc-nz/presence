@@ -28,5 +28,5 @@ def stub_check():
 
 def read_tilt_state():
     check = getattr(settings, 'TILT_CHECKER', rpi_gpio_check)
-    return STATE_OPEN if check else STATE_CLOSED
+    return STATE_OPEN if check() else STATE_CLOSED
     
