@@ -16,13 +16,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import threading, time
-
 import serial, logging
-from django.conf import settings
+import unittest
 
 
-# Get an instance of a logger
-logger = logging.getLogger('presence')
+logger = logging.getLogger(__name__)
 
 
 
@@ -63,11 +61,23 @@ class FakeSerial:
             return self.next_output
         
 
+class FakeRequest:
+    
+    def __init__(self):
+        self.success = False
+        
+    def done(self):
+        self.success = True
+        
+    def fail(self, msg):
+        pass
+
+
 
 def _get_serial():
     return serial.Serial(AtlantisModemController.PORT, baudrate=AtlantisModemController.BAUDRATE)
 
-def stub_serial():
+def _stub_serial():
     return FakeSerial()
     
 class AtlantisModemController(threading.Thread):
@@ -83,10 +93,17 @@ class AtlantisModemController(threading.Thread):
     INIT_COMMANDS = ('at\r', 'atz\r', 'at*nc9\r', 'atx3\r', 'ats11=60\r', 'ats0=0\r')
     
     
+    def __init__(self, test_env=False):
+        threading.Thread.__init__(self)
+        if test_env:
+            self._get_serial = _stub_serial
+        else:
+            self._get_serial = _get_serial
+    
+    
     def setup(self, request, timeout=60):
         
         self.request = request
-        self._get_serial = getattr(settings, 'SERIAL_FACTORY_METHOD', _get_serial)
         
         logger.debug( 'opening serial port..' )
         self.serial = self._get_serial()
@@ -134,8 +151,18 @@ class AtlantisModemController(threading.Thread):
         self.serial.close()
         
         
-        
+class TestAtlantisModemController(unittest.TestCase):
     
+    def test(self):
+        request = FakeRequest()
+        controller = AtlantisModemController(test_env=True)
+        controller.setup(request)
+        controller.run()
+        self.assertTrue(request.success)
+        
+
+if __name__ == '__main__':
+    unittest.main()
 
 
 

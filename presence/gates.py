@@ -6,18 +6,21 @@ Created on 08/nov/2014
 
 from gatecontrol.gatecontrol import Gate, STATE_CLOSED, STATE_OPEN
 from presence.atlantis import AtlantisModemController
-from presence.tilt import read_tilt_state
+from presence.tilt import rpi_gpio_check
 
 
 STATE_RING = {'value' : 2, 'description' : 'ring'}
 
 class HpccExternal(Gate):
+    
+    def __init__(self, test_env=False):
+        self.test_env = test_env
         
     def get_available_states(self):
         return (STATE_CLOSED, STATE_OPEN, STATE_RING)
     
     def open_gate(self, request):
-        self.controller = AtlantisModemController()
+        self.controller = AtlantisModemController(test_env=self.test_env)
         self.controller.setup(request)
         self.controller.start()
         
@@ -37,5 +40,11 @@ class HpccExternal(Gate):
         
 class HpccInternal(Gate):
     
+    def __init__(self, test_env=False):
+        self.test_env = test_env
+    
     def get_state(self, request=None):
-        return read_tilt_state()
+        if not self.test_env and rpi_gpio_check():
+            return STATE_OPEN
+        else:
+            return STATE_CLOSED

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-logger = logging.getLogger('presence')
+logger = logging.getLogger('gatecontrol')
 
 REQUEST_STATE_PENDING = 'PENDING'
 REQUEST_STATE_OK = 'OK'
@@ -21,7 +21,7 @@ class RequestManager(models.Manager):
         r.save()
         return r
     
-    def get_last_accesses(self, limit):
+    def get_last_accesses(self, limit=10):
         return self.filter(req_state=REQUEST_STATE_OK).order_by('-req_time')[:limit]
 
     def get_pending_request(self):

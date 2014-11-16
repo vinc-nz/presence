@@ -3,8 +3,6 @@ Created on 08/nov/2014
 
 @author: spax
 '''
-from django.conf import settings
-from gatecontrol.gatecontrol import STATE_OPEN, STATE_CLOSED
 
 
 try:
@@ -22,11 +20,5 @@ except Exception as e:
         raise RuntimeError('error setting up GPIO')
 
 
-def stub_check():
-    #shoud return True if door is open, false otherwise
-    return False
 
-def read_tilt_state():
-    check = getattr(settings, 'TILT_CHECKER', rpi_gpio_check)
-    return STATE_OPEN if check() else STATE_CLOSED
     
