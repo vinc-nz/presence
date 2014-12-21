@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-logger = logging.getLogger('gatecontrol')
+logger = logging.getLogger(__name__)
 
 REQUEST_STATE_PENDING = 'PENDING'
 REQUEST_STATE_OK = 'OK'

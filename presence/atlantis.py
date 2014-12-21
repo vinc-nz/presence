@@ -15,9 +15,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import sys
 import threading, time
-import serial, logging
 import unittest
+
+import serial, logging
 
 
 logger = logging.getLogger(__name__)
@@ -77,6 +79,14 @@ class FakeRequest:
 def _get_serial():
     return serial.Serial(AtlantisModemController.PORT, baudrate=AtlantisModemController.BAUDRATE)
 
+def check_modem():
+    try:
+        s = _get_serial()
+        s.close()
+    except Exception as e:
+        print 'ERROR: %s: %s' % (__name__, str(e))
+        sys.exit(1)
+
 def _stub_serial():
     return FakeSerial()
     
@@ -105,50 +115,60 @@ class AtlantisModemController(threading.Thread):
         
         self.request = request
         
-        logger.debug( 'opening serial port..' )
-        self.serial = self._get_serial()
-        self.serial.setTimeout(timeout)
+        try:
         
-        logger.debug( 'flushing buffers' )
-        self.serial.flushInput()
-        self.serial.flushOutput() 
-        
-        logger.debug( 'sending init commands to modem..' )
-        for c in AtlantisModemController.INIT_COMMANDS:
-            self.serial.write(c)
-            self.serial.readline() #echo
-            if self.serial.readline() != AtlantisModemController.MSG_OK:
-                #logger.error( 'error at comand: %s' % c )
-                self.serial.close()
-                raise IOError( 'error at comand: %s' % c )
+            logger.debug( 'opening serial port..' )
+            self.serial = self._get_serial()
+            self.serial.setTimeout(timeout)
             
-        logger.debug('setup complete, controller in listen mode')
+            logger.debug( 'flushing buffers' )
+            self.serial.flushInput()
+            self.serial.flushOutput() 
+            
+            logger.debug( 'sending init commands to modem..' )
+            for c in AtlantisModemController.INIT_COMMANDS:
+                self.serial.write(c)
+                self.serial.readline() #echo
+                if self.serial.readline() != AtlantisModemController.MSG_OK:
+                    #logger.error( 'error at comand: %s' % c )
+                    self.serial.close()
+                    raise IOError( 'error at comand: %s' % c )
+                
+            logger.debug('setup complete, controller in listen mode')
+            
+        except Exception as e:
+            logger.exception(e)
+            self.request.fail(str(e))
     
     def run(self):
-        logger.debug( 'modem in listen mode' )
-    
-        lineIn = self.serial.read(len(AtlantisModemController.MSG_RING))
-        if lineIn == AtlantisModemController.MSG_RING:
-            logger.debug( 'RING received' )
-            logger.debug( 'sending *' )
-            self.serial.write(AtlantisModemController.MSG_OPEN)
-            while lineIn != AtlantisModemController.MSG_BUSY and len(lineIn) > 0:
-                lineIn = self.serial.readline()
-                logger.debug( 'modem: %s' % lineIn.rstrip() )
-            if lineIn == AtlantisModemController.MSG_BUSY:
-                logger.info( 'door opened' )
-                self.request.done()
-            else:
-                msg = 'invalid input: %s' % lineIn.rstrip()
-                logger.error( msg )
-                self.request.info = msg
-        else:
-            msg = 'no RING received'
-            logger.debug( msg )
-            self.request.fail(msg)
+        try:
+            logger.debug( 'modem in listen mode' )
         
-        logger.debug( 'closing serial port' )
-        self.serial.close()
+            lineIn = self.serial.read(len(AtlantisModemController.MSG_RING))
+            if lineIn == AtlantisModemController.MSG_RING:
+                logger.debug( 'RING received' )
+                logger.debug( 'sending *' )
+                self.serial.write(AtlantisModemController.MSG_OPEN)
+                while lineIn != AtlantisModemController.MSG_BUSY and len(lineIn) > 0:
+                    lineIn = self.serial.readline()
+                    logger.debug( 'modem: %s' % lineIn.rstrip() )
+                if lineIn == AtlantisModemController.MSG_BUSY:
+                    logger.info( 'door opened' )
+                    self.request.done()
+                else:
+                    msg = 'invalid input: %s' % lineIn.rstrip()
+                    logger.error( msg )
+                    self.request.info = msg
+            else:
+                msg = 'no RING received'
+                logger.debug( msg )
+                self.request.fail(msg)
+            
+            logger.debug( 'closing serial port' )
+            self.serial.close()
+        except Exception as e:
+            logger.exception(e)
+            self.request.fail(str(e))
         
         
 class TestAtlantisModemController(unittest.TestCase):

@@ -86,7 +86,7 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = ( os.path.join(BASE_DIR, 'static'), )
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 LOGGING = {
     'version': 1,
@@ -98,6 +98,11 @@ LOGGING = {
             'filename': os.path.join(BASE_DIR, 'presence.log'),
             'formatter': 'verbose'
         },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        }
     },
     'formatters': {
         'verbose': {
@@ -108,21 +113,11 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['file'],
+        '': {
+            'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
-        },
-        'atlantis': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'gatecontrol': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
+        }
     },
 }
 
