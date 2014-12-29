@@ -24,6 +24,20 @@ import serial, logging
 
 logger = logging.getLogger(__name__)
 
+#constants
+MSG_OK =  'OK\r\n'
+MSG_RING = '\r\nRING\r\n'
+MSG_BUSY = 'BUSY\r\n'
+MSG_OPEN = 'atdt*\r'
+    
+PORT = '/dev/ttyUSB0'
+BAUDRATE = 115200
+    
+INIT_COMMANDS = ('at\r', 'atz\r', 'at*nc9\r', 'atx3\r', 'ats11=60\r', 'ats0=0\r')
+    
+ECHO_WAIT = 1
+INIT_CMD_WAIT = 5
+
 
 
 class FakeSerial:
@@ -49,13 +63,13 @@ class FakeSerial:
         
     def read(self, dontcare):
         time.sleep(10)
-        return AtlantisModemController.MSG_RING
+        return MSG_RING
         
-    def readline(self):
-        if self.last_command in AtlantisModemController.INIT_COMMANDS:
-            self.next_output = AtlantisModemController.MSG_OK 
-        elif self.last_command == AtlantisModemController.MSG_OPEN:
-            self.next_output = AtlantisModemController.MSG_BUSY
+    def readline(self, timeout=None):
+        if self.last_command in INIT_COMMANDS:
+            self.next_output = MSG_OK 
+        elif self.last_command == MSG_OPEN:
+            self.next_output = MSG_BUSY
         if self.last_command is not None:
             self.last_command = None
             return 'echo'
@@ -77,7 +91,7 @@ class FakeRequest:
 
 
 def _get_serial():
-    return serial.Serial(AtlantisModemController.PORT, baudrate=AtlantisModemController.BAUDRATE)
+    return serial.Serial(PORT, baudrate=BAUDRATE)
 
 def check_modem():
     try:
@@ -91,16 +105,6 @@ def _stub_serial():
     return FakeSerial()
     
 class AtlantisModemController(threading.Thread):
-    
-    MSG_OK =  'OK\r\n'
-    MSG_RING = '\r\nRING\r\n'
-    MSG_BUSY = 'BUSY\r\n'
-    MSG_OPEN = 'atdt*\r'
-    
-    PORT = '/dev/ttyUSB0'
-    BAUDRATE = 115200
-    
-    INIT_COMMANDS = ('at\r', 'atz\r', 'at*nc9\r', 'atx3\r', 'ats11=60\r', 'ats0=0\r')
     
     
     def __init__(self, test_env=False):
@@ -126,17 +130,25 @@ class AtlantisModemController(threading.Thread):
             self.serial.flushOutput() 
             
             logger.debug( 'sending init commands to modem..' )
-            for c in AtlantisModemController.INIT_COMMANDS:
+            for c in INIT_COMMANDS:
+                logger.debug( 'sending %s' % c )
                 self.serial.write(c)
-                self.serial.readline() #echo
-                if self.serial.readline() != AtlantisModemController.MSG_OK:
-                    #logger.error( 'error at comand: %s' % c )
-                    self.serial.close()
-                    raise IOError( 'error at comand: %s' % c )
+                logger.debug( 'reading echo'  )
+                echo = self.serial.readline(ECHO_WAIT) #echo, just wait 1 sec
+                if len(echo)==0:
+                    raise IOError( 'no echo received')
+                else:
+                    ok = self.serial.readline(INIT_CMD_WAIT)
+                    if ok != MSG_OK:
+                        raise IOError( 'error at comand: %s' % c )
                 
             logger.debug('setup complete, controller in listen mode')
             
         except Exception as e:
+            try:
+                self.serial.close()
+            except Exception:
+                pass
             logger.exception(e)
             self.request.fail(str(e))
     
@@ -144,15 +156,15 @@ class AtlantisModemController(threading.Thread):
         try:
             logger.debug( 'modem in listen mode' )
         
-            lineIn = self.serial.read(len(AtlantisModemController.MSG_RING))
-            if lineIn == AtlantisModemController.MSG_RING:
+            lineIn = self.serial.read(len(MSG_RING))
+            if lineIn == MSG_RING:
                 logger.debug( 'RING received' )
                 logger.debug( 'sending *' )
-                self.serial.write(AtlantisModemController.MSG_OPEN)
-                while lineIn != AtlantisModemController.MSG_BUSY and len(lineIn) > 0:
+                self.serial.write(MSG_OPEN)
+                while lineIn != MSG_BUSY and len(lineIn) > 0:
                     lineIn = self.serial.readline()
                     logger.debug( 'modem: %s' % lineIn.rstrip() )
-                if lineIn == AtlantisModemController.MSG_BUSY:
+                if lineIn == MSG_BUSY:
                     logger.info( 'door opened' )
                     self.request.done()
                 else:
