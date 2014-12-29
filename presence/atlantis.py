@@ -65,7 +65,7 @@ class FakeSerial:
         time.sleep(10)
         return MSG_RING
         
-    def readline(self, timeout=None):
+    def readline(self):
         if self.last_command in INIT_COMMANDS:
             self.next_output = MSG_OK 
         elif self.last_command == MSG_OPEN:
@@ -123,7 +123,7 @@ class AtlantisModemController(threading.Thread):
         
             logger.debug( 'opening serial port..' )
             self.serial = self._get_serial()
-            self.serial.setTimeout(timeout)
+            self.serial.setTimeout(INIT_CMD_WAIT)
             
             logger.debug( 'flushing buffers' )
             self.serial.flushInput()
@@ -134,14 +134,15 @@ class AtlantisModemController(threading.Thread):
                 logger.debug( 'sending %s' % c )
                 self.serial.write(c)
                 logger.debug( 'reading echo'  )
-                echo = self.serial.readline(ECHO_WAIT) #echo, just wait 1 sec
+                echo = self.serial.readline() #echo
                 if len(echo)==0:
                     raise IOError( 'no echo received')
                 else:
-                    ok = self.serial.readline(INIT_CMD_WAIT)
+                    ok = self.serial.readline()
                     if ok != MSG_OK:
                         raise IOError( 'error at comand: %s' % c )
-                
+            
+            self.serial.setTimeout(timeout)   
             logger.debug('setup complete, controller in listen mode')
             
         except Exception as e:
