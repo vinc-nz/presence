@@ -113,7 +113,17 @@ LOGGING = {
         },
     },
     'loggers': {
-        '': {
+        'gatecontrol.models': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'presence.atlantis': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'presence.tilt': {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
