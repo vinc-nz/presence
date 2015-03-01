@@ -10,6 +10,11 @@ from django.views.decorators.csrf import csrf_exempt
 from models import AccessRequest
 
 
+### HTML PAGES ###
+
+"""
+Renders an HTML homepage
+"""
 def homepage(request):
     if request.user.is_authenticated():
         gates = getattr(settings, 'GATES', {})
@@ -17,10 +22,8 @@ def homepage(request):
     else:
         return render(request, 'index.html')
     
-
-def render_json(response):
-    return HttpResponse(json.dumps(response), content_type='application/json')
-
+### JSON API ###
+    
 def get_all_states(request):
     gates = getattr(settings, 'GATES', {})
     response = []
@@ -38,6 +41,24 @@ def gatecontrol(request, gate_name):
         return get_state(gate, request.GET.get('req_id', None))
     elif request.method == 'POST':
         return open_gate(request.user, gate)
+
+@login_required
+def show_requests(request):
+    try:
+        limit = int(request.GET.get('limit', '10'))
+    except ValueError:
+        return HttpResponseBadRequest()
+    access_requests = AccessRequest.objects.get_last_accesses(limit)
+    response = []
+    for r in access_requests:
+        response.append({ 'time' : r.req_time.strftime('%Y-%m-%dT%H:%M:%S'), 'user' : r.user.username})
+    return render_json(response)
+
+### UTILITY METHODS ###
+
+def render_json(response):
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
 
 def open_gate(user, gate):
     if not user.is_authenticated():
@@ -63,16 +84,6 @@ def get_state(gate, access_request_id):
         state['pending'] = r.is_pending()
     return render_json(state)
 
-@login_required
-def show_requests(request):
-    try:
-        limit = int(request.GET.get('limit', '10'))
-    except ValueError:
-        return HttpResponseBadRequest()
-    access_requests = AccessRequest.objects.get_last_accesses(limit)
-    response = []
-    for r in access_requests:
-        response.append({ 'time' : r.req_time.strftime('%Y-%m-%dT%H:%M:%S'), 'user' : r.user.username})
-    return render_json(response)
+
     
     

@@ -50,6 +50,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+SERIALIZATION_MODULES = {
+    'yml': "django.core.serializers.pyyaml"
+}
+
 ROOT_URLCONF = 'presence.urls'
 
 WSGI_APPLICATION = 'presence.wsgi.application'

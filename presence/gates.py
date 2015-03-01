@@ -46,13 +46,14 @@ class HpccInternal(Gate):
     
     def __init__(self, test_env=False):
         self.test_env = test_env
-        try:
-            from presence.tilt import rpi_gpio_check
-            self.rpi_gpio_check = rpi_gpio_check
-        except Exception as e:
-            if not test_env:
-                print 'ERROR: could not setup %s: %s' % (HpccInternal.__name__, str(e))
-                sys.exit(1)
+        if not test_env:
+            try:
+                from presence.tilt import rpi_gpio_check
+                self.rpi_gpio_check = rpi_gpio_check
+            except Exception as e:
+                if not test_env:
+                    print 'ERROR: could not setup %s: %s' % (HpccInternal.__name__, str(e))
+                    sys.exit(1)
     
     def get_state(self, request=None):
         if not self.test_env and self.rpi_gpio_check():

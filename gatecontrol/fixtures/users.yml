@@ -1,0 +1,82 @@
+-   fields: {codename: add_logentry, content_type: 1, name: Can add log entry}
+    model: auth.permission
+    pk: 1
+-   fields: {codename: change_logentry, content_type: 1, name: Can change log entry}
+    model: auth.permission
+    pk: 2
+-   fields: {codename: delete_logentry, content_type: 1, name: Can delete log entry}
+    model: auth.permission
+    pk: 3
+-   fields: {codename: add_permission, content_type: 2, name: Can add permission}
+    model: auth.permission
+    pk: 4
+-   fields: {codename: change_permission, content_type: 2, name: Can change permission}
+    model: auth.permission
+    pk: 5
+-   fields: {codename: delete_permission, content_type: 2, name: Can delete permission}
+    model: auth.permission
+    pk: 6
+-   fields: {codename: add_group, content_type: 3, name: Can add group}
+    model: auth.permission
+    pk: 7
+-   fields: {codename: change_group, content_type: 3, name: Can change group}
+    model: auth.permission
+    pk: 8
+-   fields: {codename: delete_group, content_type: 3, name: Can delete group}
+    model: auth.permission
+    pk: 9
+-   fields: {codename: add_user, content_type: 4, name: Can add user}
+    model: auth.permission
+    pk: 10
+-   fields: {codename: change_user, content_type: 4, name: Can change user}
+    model: auth.permission
+    pk: 11
+-   fields: {codename: delete_user, content_type: 4, name: Can delete user}
+    model: auth.permission
+    pk: 12
+-   fields: {codename: add_contenttype, content_type: 5, name: Can add content type}
+    model: auth.permission
+    pk: 13
+-   fields: {codename: change_contenttype, content_type: 5, name: Can change content
+            type}
+    model: auth.permission
+    pk: 14
+-   fields: {codename: delete_contenttype, content_type: 5, name: Can delete content
+            type}
+    model: auth.permission
+    pk: 15
+-   fields: {codename: add_session, content_type: 6, name: Can add session}
+    model: auth.permission
+    pk: 16
+-   fields: {codename: change_session, content_type: 6, name: Can change session}
+    model: auth.permission
+    pk: 17
+-   fields: {codename: delete_session, content_type: 6, name: Can delete session}
+    model: auth.permission
+    pk: 18
+-   fields: {codename: add_accessrequest, content_type: 7, name: Can add access request}
+    model: auth.permission
+    pk: 19
+-   fields: {codename: change_accessrequest, content_type: 7, name: Can change access
+            request}
+    model: auth.permission
+    pk: 20
+-   fields: {codename: delete_accessrequest, content_type: 7, name: Can delete access
+            request}
+    model: auth.permission
+    pk: 21
+-   fields:
+        date_joined: 2014-11-09 12:18:04.326536
+        email: admin@admin.com
+        first_name: ''
+        groups: []
+        is_active: true
+        is_staff: true
+        is_superuser: true
+        last_login: 2014-12-29 21:41:43.969215
+        last_name: ''
+        password: pbkdf2_sha256$12000$ruC4n88EsaKF$GPEQFf5tQFQORbaKwHsCtLQi731jG6PMYMXamL7A7js=
+        user_permissions: []
+        username: admin
+    model: auth.user
+    pk: 1
