@@ -122,12 +122,12 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'presence.atlantis': {
+        'hlcs.atlantis': {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        'presence.tilt': {
+        'hlcs.tilt': {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
@@ -135,8 +135,16 @@ LOGGING = {
     },
 }
 
+from hlcs.gates import HpccInternal, HpccExternal
+GATES = {
+
+'internal' : HpccInternal(test_env=True),
+'external' : HpccExternal(test_env=True)         
+
+}
+
 try:
-    from local_settings import *
+    from .local_settings import *
 except ImportError:
     pass
 

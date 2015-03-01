@@ -1,29 +1,15 @@
-import json
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http.response import HttpResponse, Http404, HttpResponseForbidden, \
-    HttpResponseBadRequest
-from django.shortcuts import render, get_object_or_404
+from django.http.response import  Http404, HttpResponseForbidden, \
+    HttpResponseBadRequest, JsonResponse
+from django.shortcuts import  get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from models import AccessRequest
+from gatecontrol.models import AccessRequest
 
 
-### HTML PAGES ###
-
-"""
-Renders an HTML homepage
-"""
-def homepage(request):
-    if request.user.is_authenticated():
-        gates = getattr(settings, 'GATES', {})
-        return render(request, 'panel.html', gates)
-    else:
-        return render(request, 'index.html')
-    
 ### JSON API ###
-    
 def get_all_states(request):
     gates = getattr(settings, 'GATES', {})
     response = []
@@ -34,7 +20,7 @@ def get_all_states(request):
 @csrf_exempt
 def gatecontrol(request, gate_name):
     gates = getattr(settings, 'GATES')
-    if gates is None or not gates.has_key(gate_name):
+    if gates is None or gate_name not in gates:
         raise Http404
     gate = gates[gate_name]
     if request.method == 'GET':
@@ -57,7 +43,7 @@ def show_requests(request):
 ### UTILITY METHODS ###
 
 def render_json(response):
-    return HttpResponse(json.dumps(response), content_type='application/json')
+    return JsonResponse(response, safe=False)
 
 
 def open_gate(user, gate):

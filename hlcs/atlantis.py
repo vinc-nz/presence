@@ -42,6 +42,8 @@ INIT_CMD_WAIT = 5
 
 class FakeSerial:
     
+    READ_TIMEOUT = 60
+    
     def __init__(self):
         self.last_command = None
         self.next_output = None
@@ -62,7 +64,7 @@ class FakeSerial:
         self.last_command = command
         
     def read(self, dontcare):
-        time.sleep(10)
+        time.sleep(FakeSerial.READ_TIMEOUT)
         return MSG_RING
         
     def readline(self):
@@ -98,7 +100,7 @@ def check_modem():
         s = _get_serial()
         s.close()
     except Exception as e:
-        print 'ERROR: %s: %s' % (__name__, str(e))
+        print ('ERROR: %s: %s' % (__name__, str(e)))
         sys.exit(1)
 
 def _stub_serial():
@@ -184,18 +186,9 @@ class AtlantisModemController(threading.Thread):
             self.request.fail(str(e))
         
         
-class TestAtlantisModemController(unittest.TestCase):
-    
-    def test(self):
-        request = FakeRequest()
-        controller = AtlantisModemController(test_env=True)
-        controller.setup(request)
-        controller.run()
-        self.assertTrue(request.success)
+
         
 
-if __name__ == '__main__':
-    unittest.main()
 
 
 

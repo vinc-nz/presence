@@ -5,10 +5,11 @@ Created on 08/nov/2014
 '''
 import logging
 
+import RPi.GPIO as GPIO
+
 
 logger = logging.getLogger(__name__)
 
-import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BOARD)
 LOCK_PIN=8
 GPIO.setup(LOCK_PIN, GPIO.IN) 

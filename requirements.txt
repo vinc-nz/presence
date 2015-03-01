@@ -1,5 +1,4 @@
-Django==1.6.2
-argparse==1.2.1
+Django==1.7.5
+PyYAML==3.11
+RPi.GPIO==0.5.11
 pyserial==2.7
-wsgiref==0.1.2
-RPi.GPIO==0.5.5

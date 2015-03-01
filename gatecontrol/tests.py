@@ -6,12 +6,16 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
-from gatecontrol import Gate
-from models import AccessRequest
+from gatecontrol.gatecontrol import Gate
+from gatecontrol.models import AccessRequest
 
 
 class TestViews(TestCase):
     fixtures = ['users.yml']
+    
+    def parse_response(self, response):
+        self.assertEqual(200, response.status_code)
+        return json.loads(response.content.decode(response._charset))
     
     def setUp(self):
         TestCase.setUp(self)
@@ -20,29 +24,30 @@ class TestViews(TestCase):
         self.assertTrue(self.client.login(username='admin', password='admin'))
     
     def test_get_all_states(self):
-        expected = [{'test' : Gate().get_state(None) }]
+        expected = [{'test' : Gate().get_state() }]
         response = self.client.get(reverse('gates'))
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(json.dumps(expected), response.content)
+        actual = self.parse_response(response)
+        self.assertEqual(expected, actual)
         
     def test_gatecontrol(self):
-        req_id = {"req_id": 1}
+        expected = {"req_id": 1}
         response = self.client.post(reverse('control', args=('test',)))
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(json.dumps(req_id), response.content)
+        req_id = self.parse_response(response)
+        self.assertEqual(expected, req_id)
         response = self.client.get(reverse('control', args=('test',)), data=req_id)
         expected = {"pending": True, "description": "closed", "value": 0}
-        response = json.loads(response.content)
-        self.assertEqual(expected.viewkeys(), response.viewkeys())
+        actual = self.parse_response(response)
+        self.assertEqual(expected.keys(), actual.keys())
         
     def test_show_requests(self):
-        self.client.post(reverse('control', args=('test',)))
+        response = self.client.post(reverse('control', args=('test',)))
+        self.assertEqual(200, response.status_code)
         pending = AccessRequest.objects.get_pending_request()
         pending.done()
         response = self.client.get(reverse('requests'))
-        response = json.loads(response.content)
+        actual = self.parse_response(response)[0]
         expected = {"user": "admin", "time": "2015-03-01T17:28:18"}
-        self.assertEqual(expected.viewkeys(), response[0].viewkeys())
+        self.assertEqual(expected.keys(), actual.keys())
         
     
 
