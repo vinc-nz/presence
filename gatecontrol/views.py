@@ -66,8 +66,6 @@ def get_state(gate, access_request_id):
     else:
         r = None
     state = gate.get_state(r)
-    if r is not None:
-        state['pending'] = r.is_pending()
     return render_json(state)
 
 

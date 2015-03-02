@@ -49,9 +49,9 @@ jQuery.timeago.settings.strings = {
     	 $(label_id).removeClass("label-success");
     	 $(label_id).removeClass("label-danger");
     	 $(label_id).text(state.description);
-    	 if (state.value == 0)
+    	 if (state.id == 0)
     		 $(label_id).addClass("label-default");
-    	 else  if (state.value == 1)
+    	 else  if (state.id == 1)
     		 $(label_id).addClass("label-success");
     	 else
     		 $(label_id).addClass("label-warning");

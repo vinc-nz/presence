@@ -1,17 +1,18 @@
 import json
 import time
+from unittest.mock import MagicMock
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
-from gatecontrol.gatecontrol import Gate
+from gatecontrol.gatecontrol import Gate, STATE_CLOSED
 from gatecontrol.models import AccessRequest
 
 
 class TestViews(TestCase):
-    fixtures = ['users.yml']
+    fixtures = ['users.yml', 'requests.yml']
     
     def parse_response(self, response):
         self.assertEqual(200, response.status_code)
@@ -19,31 +20,30 @@ class TestViews(TestCase):
     
     def setUp(self):
         TestCase.setUp(self)
-        setattr(settings, 'GATES', {'test' : Gate() } )
+        mock = Gate()
+        mock.get_state = MagicMock(return_value=STATE_CLOSED)
+        mock.open_gate = MagicMock()
+        setattr(settings, 'GATES', {'test' : mock } )
         self.client = Client()
         self.assertTrue(self.client.login(username='admin', password='admin'))
     
     def test_get_all_states(self):
-        expected = [{'test' : Gate().get_state() }]
+        expected = [{'test' : STATE_CLOSED }]
         response = self.client.get(reverse('gates'))
         actual = self.parse_response(response)
         self.assertEqual(expected, actual)
         
     def test_gatecontrol(self):
-        expected = {"req_id": 1}
+        expected = {"req_id": 2}
         response = self.client.post(reverse('control', args=('test',)))
         req_id = self.parse_response(response)
         self.assertEqual(expected, req_id)
         response = self.client.get(reverse('control', args=('test',)), data=req_id)
-        expected = {"pending": True, "description": "closed", "value": 0}
+        expected = {"description": "closed", "id": 0}
         actual = self.parse_response(response)
         self.assertEqual(expected.keys(), actual.keys())
         
     def test_show_requests(self):
-        response = self.client.post(reverse('control', args=('test',)))
-        self.assertEqual(200, response.status_code)
-        pending = AccessRequest.objects.get_pending_request()
-        pending.done()
         response = self.client.get(reverse('requests'))
         actual = self.parse_response(response)[0]
         expected = {"user": "admin", "time": "2015-03-01T17:28:18"}

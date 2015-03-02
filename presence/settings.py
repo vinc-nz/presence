@@ -117,31 +117,21 @@ LOGGING = {
         },
     },
     'loggers': {
-        'gatecontrol.models': {
+        'gatecontrol': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'hlcs': {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        'hlcs.atlantis': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'hlcs.tilt': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        }
+       
     },
 }
 
-from hlcs.gates import HpccInternal, HpccExternal
-GATES = {
 
-'internal' : HpccInternal(test_env=True),
-'external' : HpccExternal(test_env=True)         
-
-}
 
 try:
     from .local_settings import *

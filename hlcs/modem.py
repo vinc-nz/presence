@@ -16,10 +16,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import sys
-import threading, time
-import unittest
+import threading
 
 import serial, logging
+import time
 
 
 logger = logging.getLogger(__name__)
@@ -30,91 +30,71 @@ MSG_RING = '\r\nRING\r\n'
 MSG_BUSY = 'BUSY\r\n'
 MSG_OPEN = 'atdt*\r'
     
-PORT = '/dev/ttyUSB0'
-BAUDRATE = 115200
-    
 INIT_COMMANDS = ('at\r', 'atz\r', 'at*nc9\r', 'atx3\r', 'ats11=60\r', 'ats0=0\r')
     
 ECHO_WAIT = 1
 INIT_CMD_WAIT = 5
 
-
-
-class FakeSerial:
+class Modem:
     
-    READ_TIMEOUT = 60
+    def get_controller(self):
+        pass
+
+class ModemController:
+    
+    def setup(self, request):
+        self.request = request
+
+class DummyModem(Modem):
+    
+    def get_controller(self):
+        return DummyController()
+    
+
+class DummyController(threading.Thread, ModemController):
+    
+    WAIT = 10
+    
+    def run(self):
+        threading.Thread.run(self)
+        time.sleep(DummyController.WAIT)
+        self.request.done()
+    
+    
+
+class AtlantisModem(Modem):
+    
+    PORT = '/dev/ttyUSB0'
+    BAUDRATE = 115200
     
     def __init__(self):
-        self.last_command = None
-        self.next_output = None
+        self._check_connection()
     
-    def flushInput(self):
-        pass
+    def _get_serial(self):
+        return serial.Serial(AtlantisModem.PORT, baudrate=AtlantisModem.BAUDRATE)
     
-    def flushOutput(self):
-        pass
+    def _check_connection(self):
+        try:
+            s = self._get_serial()
+            s.close()
+        except Exception as e:
+            print ('ERROR: %s: %s' % (__name__, str(e)))
+            sys.exit(1)
     
-    def close(self):
-        pass
-    
-    def setTimeout(self, timeout):
-        pass
-    
-    def write(self, command):
-        self.last_command = command
-        
-    def read(self, dontcare):
-        time.sleep(FakeSerial.READ_TIMEOUT)
-        return MSG_RING
-        
-    def readline(self):
-        if self.last_command in INIT_COMMANDS:
-            self.next_output = MSG_OK 
-        elif self.last_command == MSG_OPEN:
-            self.next_output = MSG_BUSY
-        if self.last_command is not None:
-            self.last_command = None
-            return 'echo'
-        else:
-            return self.next_output
-        
-
-class FakeRequest:
-    
-    def __init__(self):
-        self.success = False
-        
-    def done(self):
-        self.success = True
-        
-    def fail(self, msg):
-        pass
-
-
-
-def _get_serial():
-    return serial.Serial(PORT, baudrate=BAUDRATE)
-
-def check_modem():
-    try:
-        s = _get_serial()
-        s.close()
-    except Exception as e:
-        print ('ERROR: %s: %s' % (__name__, str(e)))
-        sys.exit(1)
-
-def _stub_serial():
-    return FakeSerial()
-    
-class AtlantisModemController(threading.Thread):
+    def get_controller(self):
+        logger.debug( 'opening serial port..' )
+        serial = self._get_serial()
+        logger.debug( 'serial port opened' )
+        return AtlantisModemController(serial)
     
     
-    def __init__(self, test_env=False):
+    
+class AtlantisModemController(threading.Thread, ModemController):
+    
+    
+    def __init__(self, serial):
         threading.Thread.__init__(self)
-        if test_env:
-            self._get_serial = _stub_serial
-        else:
-            self._get_serial = _get_serial
+        self.serial = serial
     
     
     def setup(self, request, timeout=60):
@@ -123,8 +103,6 @@ class AtlantisModemController(threading.Thread):
         
         try:
         
-            logger.debug( 'opening serial port..' )
-            self.serial = self._get_serial()
             self.serial.setTimeout(INIT_CMD_WAIT)
             
             logger.debug( 'flushing buffers' )
