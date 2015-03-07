@@ -18,7 +18,7 @@ GPIO.setup(LOCK_PIN, GPIO.IN)
 
 def rpi_gpio_check():
     try:
-        return True if GPIO.input(LOCK_PIN) else False
+        return GPIO.input(LOCK_PIN)
     except Exception as e:
         logger.exception(e)
         return False

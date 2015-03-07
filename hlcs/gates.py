@@ -51,7 +51,8 @@ class HpccInternal(Gate):
             sys.exit(1)
     
     def get_state(self, request=None):
-        return self.rpi_gpio_check()
+        is_open = self.rpi_gpio_check()
+        return STATE_OPEN if is_open else STATE_CLOSED
     
     def open_gate(self, request=None):
         raise NotImplemented()
