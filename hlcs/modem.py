@@ -95,7 +95,7 @@ class AtlantisModemController(threading.Thread, ModemController):
     def __init__(self, serial):
         threading.Thread.__init__(self)
         self.serial = serial
-    
+        
     
     def setup(self, request, timeout=60):
         
@@ -112,7 +112,7 @@ class AtlantisModemController(threading.Thread, ModemController):
             logger.debug( 'sending init commands to modem..' )
             for c in INIT_COMMANDS:
                 logger.debug( 'sending %s' % c )
-                self.serial.write(c)
+                self.serial.write(c.encode())
                 logger.debug( 'reading echo'  )
                 echo = self.serial.readline() #echo
                 if len(echo)==0:
@@ -141,7 +141,7 @@ class AtlantisModemController(threading.Thread, ModemController):
             if lineIn == MSG_RING:
                 logger.debug( 'RING received' )
                 logger.debug( 'sending *' )
-                self.serial.write(MSG_OPEN)
+                self.serial.write(MSG_OPEN.encode())
                 while lineIn != MSG_BUSY and len(lineIn) > 0:
                     lineIn = self.serial.readline()
                     logger.debug( 'modem: %s' % lineIn.rstrip() )
