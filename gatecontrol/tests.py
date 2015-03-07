@@ -1,6 +1,6 @@
 import json
 import time
-from unittest.mock import MagicMock
+from mock import MagicMock
 
 from django.conf import settings
 from django.contrib.auth.models import User
