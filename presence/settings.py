@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+from gatecontrol.gatecontrol import Gate
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -38,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'gatecontrol',
 )
 
@@ -52,6 +55,13 @@ MIDDLEWARE_CLASSES = (
 
 SERIALIZATION_MODULES = {
     'yml': "django.core.serializers.pyyaml"
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
 }
 
 ROOT_URLCONF = 'presence.urls'
@@ -131,6 +141,8 @@ LOGGING = {
     },
 }
 
+
+GATES = {'test' : Gate()}
 
 
 try:

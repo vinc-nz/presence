@@ -1,10 +1,9 @@
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.http.response import  Http404, HttpResponseForbidden, \
     HttpResponseBadRequest, JsonResponse
 from django.shortcuts import  get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
 
 from gatecontrol.models import AccessRequest
 
@@ -17,7 +16,7 @@ def get_all_states(request):
         response.append({g : gates[g].get_state()})
     return render_json(response)
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def gatecontrol(request, gate_name):
     gates = getattr(settings, 'GATES')
     if gates is None or gate_name not in gates:
@@ -28,7 +27,7 @@ def gatecontrol(request, gate_name):
     elif request.method == 'POST':
         return open_gate(request.user, gate)
 
-@login_required
+@api_view(['GET'])
 def show_requests(request):
     try:
         limit = int(request.GET.get('limit', '10'))

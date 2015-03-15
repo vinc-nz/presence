@@ -4,3 +4,4 @@ RPi.GPIO==0.5.11
 httplib2==0.9
 mock==1.0.1
 pyserial==2.7
+djangorestframework==3.1.0
