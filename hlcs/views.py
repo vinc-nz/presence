@@ -12,3 +12,6 @@ def homepage(request):
         return render(request, 'panel.html', gates)
     else:
         return render(request, 'index.html')
+
+def about(request):
+    return render(request, 'about.html')

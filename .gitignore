@@ -1,4 +1,5 @@
-*venv
+*env*
+*Env*
 db.*
 *.log
 *.pyc
