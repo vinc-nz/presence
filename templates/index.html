@@ -11,7 +11,7 @@
     	$(".cover-heading").text("Chiuso");
     	$("#info").hide();
     }
-    
+
     function setOpenHeading() {
     	$(".cover-heading").text("Aperto");
     	$("#info").show();
@@ -34,7 +34,7 @@
 
 		});
 	}
-	
+
 	$(document).ready(function(){
 		$("#info").hide();
 		update();
@@ -66,9 +66,9 @@
 					<p>Siamo <strong>aperti</strong>? Fantastico!</p>
 				    <p>Suona l'interno "<strong>Sinope</strong>" (*) e ti apriamo :)</p>
 				    <p><small>(*) Tenere premuto fino a che non sentirete John Lennon.</small></p>
-               </div>
-            
-          </div>
+        </div>
+        <p><a href ="{% url 'about' %}"><small>Ulteriori info su Presence.</small></a></p>
+      </div>
 
 
         </div>
@@ -76,7 +76,5 @@
       </div>
 
     </div>
-    
+
 {% endblock %}
-
-

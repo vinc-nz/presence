@@ -1,0 +1,46 @@
+{% extends "base.html" %} {% load staticfiles %} {% block extrastyle %}
+
+<!-- Custom styles for this template-->
+<link href="{% static 'bootstrap/css/cover.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+
+<div class="site-wrapper">
+
+	<div class="site-wrapper-inner">
+
+		<div class="cover-container">
+
+			<div class="masthead clearfix">
+				<div class="inner">
+					<h3 class="masthead-brand">HLCS</h3>
+					<ul class="nav masthead-nav">
+						<li><a href="/accounts/login/?next=/">Log In</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="inner cover">
+				<h1 class="cover-heading"></h1>
+				<p class="lead"></p>
+				<div id="info">
+          <p>Il Presence, una webapp che permette di sapere se c’è qualcuno all’interno del laboratorio e di aprire la porta esterna a chi è abilitato.</p>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/gqySJz94Evg" frameborder="0"></iframe>
+				    <ul>
+              <li><a href "http://hlcs.it/ny9no"><strong>Articolo</strong> su hlcs.it</a></li>
+              <li><a href "https://github.com/sp4x/presence/"><strong>Repository</strong> del codice sorgente.</a></li>
+            </ul>
+            <p><a href "{% url 'home' %}"><small>Torna alla Home Page</small></a></p>
+
+               </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </div>
+{% endblock %}

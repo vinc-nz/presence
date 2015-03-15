@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 
-{% block title %}Control Panel{% endblock %} 
+{% block title %}Control Panel{% endblock %}
 
 {% block script %}
 
@@ -72,7 +72,7 @@ jQuery.timeago.settings.strings = {
              error: setError
 		 });
 	}
-	
+
 	function updateLabel(label_id, state) {
 		 $(label_id).removeClass("label-default");
     	 $(label_id).removeClass("label-warning");
@@ -88,7 +88,7 @@ jQuery.timeago.settings.strings = {
 	}
 
 	function waitRing(response) {
-		
+
 		var endpoint = "{% url 'control' 'external' %}" + "?req_id=" + response.req_id;
 		var interval = setInterval(function() {
 			 $.ajax({
@@ -106,7 +106,7 @@ jQuery.timeago.settings.strings = {
 			 });
 		}, 1000);
 	}
-	
+
 	function update() {
 		$.ajax({
 			url : "{% url 'control' 'internal' %}",
@@ -120,7 +120,7 @@ jQuery.timeago.settings.strings = {
 			}
 
 		});
-		
+
 		$.ajax({
 			url : "{% url 'requests' %}" + "?limit=5",
 			type : 'GET',
@@ -137,22 +137,22 @@ jQuery.timeago.settings.strings = {
 				$(".timeago").timeago();
 			},
 			error : function(xhr, status) {
-				
+
 			}
 
 		});
-		
-		
+
+
 	}
-	
+
 	$(document).ready(function(){
 		update();
 		setInterval(update, 5000);
 	});
-	
+
 </script>
 
-{% endblock %} 
+{% endblock %}
 
 {% block extrastyle %}
 
@@ -177,7 +177,7 @@ margin-top: 8px;
 }
 
 .label {
- text-transform: uppercase; 
+ text-transform: uppercase;
 }
 
 </style>
@@ -186,7 +186,7 @@ margin-top: 8px;
 
 
 
-{% endblock %} 
+{% endblock %}
 
 
 {% block body %}
@@ -218,11 +218,11 @@ margin-top: 8px;
 		<h1>Control Panel</h1>
 		<p class="lead">Ciao <strong>{{ user }}</strong></p>
 	</div>
-	
+
 	<div class="row">
-	
+
 		<div class="col-sm-3">
-	
+
 			<div class="panel panel-primary">
 				<div class="panel-heading">
 					<h3 class="panel-title">Porta Interna</h3>
@@ -232,7 +232,7 @@ margin-top: 8px;
 					<div style="float: right"><button class="btn btn-lg btn-default" type="button" disabled="">Apri</button></div>
 				</div>
 			</div>
-			
+
 			<div class="panel panel-primary">
 				<div class="panel-heading">
 					<h3 class="panel-title">Porta Esterna</h3>
@@ -242,20 +242,20 @@ margin-top: 8px;
 					<div style="float: right"><button onclick="openExternal()" class="btn btn-lg btn-primary" type="button">Apri</button></div>
 				</div>
 			</div>
-		
+
 		</div>
-		
+
 		<div class="col-sm-2">
 			<div class="panel panel-primary">
 				<div class="panel-heading">
 					<h3 class="panel-title">Ultimi ingressi</h3>
 				</div>
 				<div id="requests" class="panel-body">
-					
+
 				</div>
 			</div>
 		</div>
-	
+
 	</div>
 </div>
 
