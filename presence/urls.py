@@ -15,5 +15,5 @@ urlpatterns = patterns('',
     url(r'^gates/$', 'gatecontrol.views.get_all_states', name='gates'),
     url(r'^requests/$', 'gatecontrol.views.show_requests', name='requests'),
     url(r'^about/$', 'hlcs.views.about', name='about'),
-    url(r'^', 'hlcs.views.homepage', name='home'),
+    url(r'^$', 'hlcs.views.homepage', name='home'),
 )
