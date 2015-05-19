@@ -44,17 +44,21 @@ class HpccInternal(Gate):
     
     def __init__(self):
         try:
-            from hlcs.tilt import rpi_gpio_check
-            self.rpi_gpio_check = rpi_gpio_check
+            from hlcs.gpio import magnet_input, send_open_pulse
+            self.magnet_input = magnet_input
+            self.send_open_pulse = send_open_pulse
         except Exception as e:
             print ('ERROR: could not setup %s: %s' % (HpccInternal.__name__, str(e)))
             sys.exit(1)
     
     def get_state(self, request=None):
-        is_open = self.rpi_gpio_check()
+        is_open = self.magnet_input()
         return STATE_OPEN if is_open else STATE_CLOSED
     
     def open_gate(self, request=None):
-        raise NotImplemented()
+        if request is not None:
+            self.send_open_pulse()
+            self.state = STATE_OPEN
+            request.done()
 
 

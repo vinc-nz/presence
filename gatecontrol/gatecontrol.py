@@ -25,4 +25,3 @@ class Gate:
     def get_available_states(self):
         return (STATE_OPEN, STATE_CLOSED)
     
-  
