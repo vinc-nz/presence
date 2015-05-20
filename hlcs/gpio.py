@@ -36,9 +36,9 @@ def magnet_input():
 
 def send_open_pulse():
     try:
-        GPIO.output(MAGNET_PIN, PULSE_ON)
+        GPIO.output(LOCK_PIN, PULSE_ON)
         sleep(PULSE_SLEEP)
-        GPIO.output(MAGNET_PIN, PULSE_OFF)
+        GPIO.output(LOCK_PIN, PULSE_OFF)
     except Exception as e:
         logger.exception(e)
     

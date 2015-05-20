@@ -57,8 +57,11 @@ class HpccInternal(Gate):
     
     def open_gate(self, request=None):
         if request is not None:
-            self.send_open_pulse()
-            self.state = STATE_OPEN
-            request.done()
+            if request.user.is_staff:
+                self.send_open_pulse()
+                self.state = STATE_OPEN
+                request.done()
+            else:
+                request.fail('Access denied')
 
 
