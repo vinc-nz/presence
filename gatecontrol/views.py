@@ -51,7 +51,7 @@ def open_gate(user, gate):
     r = AccessRequest.objects.get_pending_request()
     if r is None:
         r = AccessRequest.objects.create(user)
-    gate.open_gate(r)
+        gate.open_gate(r)
     response = { 'req_id' : r.id }
     return render_json(response)
   

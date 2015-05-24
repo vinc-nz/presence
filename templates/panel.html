@@ -98,6 +98,7 @@ jQuery.timeago.settings.strings = {
 
 	function waitRing(response) {
 		
+		$("#external-button").prop('disabled', true);
 		var endpoint = "{% url 'control' 'external' %}" + "?req_id=" + response.req_id;
 		var interval = setInterval(function() {
 			 $.ajax({
@@ -238,7 +239,7 @@ margin-top: 8px;
 				</div>
 				<div class="panel-body">
 					<div style="float: left"><h3><span class="label label-default" id="internal-status">closed</span></h3></div>
-					<div style="float: right"><button onclick="openInternal()" {{ options }} class="btn btn-lg btn-primary" type="button">Apri</button></div>
+					<div style="float: right"><button id="internal-button" onclick="openInternal()" {{ options }} class="btn btn-lg btn-primary" type="button">Apri</button></div>
 				</div>
 			</div>
 			
@@ -248,7 +249,7 @@ margin-top: 8px;
 				</div>
 				<div class="panel-body">
 					<div style="float: left"><h3><span class="label label-default" id="external-status">closed</span></h3></div>
-					<div style="float: right"><button onclick="openExternal()" class="btn btn-lg btn-primary" type="button">Apri</button></div>
+					<div style="float: right"><button id="external-button" onclick="openExternal()" class="btn btn-lg btn-primary" type="button">Apri</button></div>
 				</div>
 			</div>
 		
