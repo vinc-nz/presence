@@ -44,7 +44,7 @@ class TestViews(TestCase):
         self.assertEqual(expected.keys(), actual.keys())
         
     def test_show_requests(self):
-        response = self.client.get(reverse('requests'))
+        response = self.client.get(reverse('requests',  args=('test',) ))
         actual = self.parse_response(response)[0]
         expected = {"user": "admin", "time": "2015-03-01T17:28:18"}
         self.assertEqual(expected.keys(), actual.keys())
@@ -59,15 +59,15 @@ class TestManager(TestCase):
         self.user = User.objects.get(pk=1)
     
     def test_get_pending_request(self):
-        r1 = AccessRequest.objects.create(self.user)
-        self.assertEquals(r1, AccessRequest.objects.get_pending_request())
+        r1 = AccessRequest.objects.get_or_create(self.user, MagicMock(), 'test')
+        self.assertEquals(r1, AccessRequest.objects.get_pending_request( 'test'))
         
     def test_get_last_accesses(self):
         u = self.user
-        r1 = AccessRequest.objects.create(u)
+        r1 = AccessRequest.objects.get_or_create(u, Gate(), 'test')
         r1.done()
         time.sleep(1)
-        r2 = AccessRequest.objects.create(u)
+        r2 = AccessRequest.objects.get_or_create(u, Gate(), 'test')
         r2.done()
-        accesses = [a.id for a in AccessRequest.objects.get_last_accesses()]
+        accesses = [a.id for a in AccessRequest.objects.get_last_accesses('test')]
         self.assertEquals( [r2.id, r1.id], accesses)
