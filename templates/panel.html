@@ -74,11 +74,15 @@ jQuery.timeago.settings.strings = {
 	}
 	
 	function openInternal() {
+		$("#internal-button").prop('disabled', true);
 		 $.ajax({
             url: "{% url 'control' 'internal' %}",
             type: 'POST',
             dataType: 'json',
-            success: function(){}
+            success: function(){},
+            error: function() {
+            	$("#internal-button").prop('disabled', false);
+            }
 		 });
 	}
 	
@@ -112,6 +116,7 @@ jQuery.timeago.settings.strings = {
 	             },
 	             error: function (xhr, status) {
 	            	 setError("#external-status");
+	            	 $("#external-button").prop('disabled', false);
 	             }
 			 });
 		}, 1000);
@@ -132,7 +137,7 @@ jQuery.timeago.settings.strings = {
 		});
 		
 		$.ajax({
-			url : "{% url 'requests' %}" + "?limit=5",
+			url : "{% url 'requests' 'internal' %}" + "?limit=5",
 			type : 'GET',
 			dataType : 'json',
 			success : function(response) {

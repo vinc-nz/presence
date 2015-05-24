@@ -57,7 +57,9 @@ class HpccInternal(Gate):
     
     def open_gate(self, request=None):
         if request is not None:
-            if request.user.is_staff:
+            if self.is_open():
+                request.fail('Gate already open')
+            elif request.user.is_staff:
                 self.send_open_pulse()
                 self.state = STATE_OPEN
                 request.done()
