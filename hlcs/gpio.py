@@ -18,8 +18,8 @@ LOCK_PIN = getattr(settings, 'LOCK_PIN', 4)
 MAGNET_PIN = getattr(settings, 'MAGNET_PIN', 17)
 
 PULSE_SLEEP = getattr(settings, 'PULSE_SLEEP', 1)
-PULSE_ON = getattr(settings, 'PULSE_ON', 1)
-PULSE_OFF = getattr(settings, 'PULSE_OFF', 0)
+PULSE_ON = getattr(settings, 'PULSE_ON', 0)
+PULSE_OFF = getattr(settings, 'PULSE_OFF', 1)
 
 GPIO.setup(LOCK_PIN, GPIO.OUT, initial=PULSE_OFF)
 GPIO.setup(MAGNET_PIN, GPIO.IN)  

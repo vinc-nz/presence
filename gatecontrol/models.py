@@ -4,7 +4,6 @@ import logging
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.template.defaultfilters import default
 
 
 logger = logging.getLogger(__name__)
@@ -16,11 +15,11 @@ REQUEST_STATE_FAIL = 'FAIL'
 
 class RequestManager(models.Manager):
     
-    def get_or_create(self, user, gate, gate_name):
+    def get_or_create(self, user, address, gate, gate_name):
         access_request = self.get_pending_request(gate_name)
         if access_request is None:
             logger.info('user %s requested access' % user.username)
-            access_request = AccessRequest( user = user, gate=gate_name, req_time = datetime.datetime.now(), req_state = REQUEST_STATE_PENDING )
+            access_request = AccessRequest( user = user, gate=gate_name, address=address, req_time = datetime.datetime.now(), req_state = REQUEST_STATE_PENDING )
             gate.open_gate(access_request)
             access_request.save()
         return access_request
@@ -40,6 +39,7 @@ class AccessRequest(models.Model):
     req_state = models.TextField()
     info = models.TextField()
     gate = models.TextField(default='unknown')
+    address = models.TextField(default='unknown')
     objects = RequestManager()
     
     def done(self):

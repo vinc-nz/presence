@@ -25,7 +25,7 @@ def gatecontrol(request, gate_name):
     if request.method == 'GET':
         return _get_state(gate, request.GET.get('req_id', None))
     elif request.method == 'POST':
-        r = AccessRequest.objects.get_or_create(request.user, gate, gate_name)
+        r = AccessRequest.objects.get_or_create(request.user, request.META.get('HTTP_X_FORWARDED_FOR'), gate, gate_name)
         return JsonResponse({ 'req_id' : r.id })
 
 @api_view(['GET'])

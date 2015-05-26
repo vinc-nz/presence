@@ -8,6 +8,8 @@ import sys
 
 from gatecontrol.gatecontrol import Gate, STATE_CLOSED, STATE_OPEN
 from hlcs.modem import AtlantisModem
+from django.conf import settings
+import re
 
 
 STATE_RING = {'id' : 2, 'description' : 'ring'}
@@ -55,10 +57,16 @@ class HpccInternal(Gate):
         is_open = self.magnet_input()
         return STATE_OPEN if is_open else STATE_CLOSED
     
+    def is_from_local_address(self, request):
+        pattern = getattr(settings, 'IP_PATTERN', '10.87.1.\d+')
+        return re.match(pattern, request.address)
+    
     def open_gate(self, request=None):
         if request is not None:
             if self.is_open():
                 request.fail('Gate already open')
+            elif not self.is_from_local_address(request):
+                request.fail('Source is not local')
             elif request.user.is_staff:
                 self.send_open_pulse()
                 self.state = STATE_OPEN
