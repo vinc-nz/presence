@@ -6,7 +6,6 @@ Created on 08/nov/2014
 
 STATE_CLOSED = {'id' : 0, 'description' : 'closed'}
 STATE_OPEN = {'id' : 1, 'description' : 'open'}
-STATE_PENDING = {'id' : 2, 'description' : 'pending'}
 
 
 class Gate:
@@ -22,7 +21,9 @@ class Gate:
     def get_state(self, request=None):
         return self.state
     
+    def is_open(self):
+        return self.get_state() == STATE_OPEN
+    
     def get_available_states(self):
         return (STATE_OPEN, STATE_CLOSED)
     
-  

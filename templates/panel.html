@@ -73,6 +73,19 @@ jQuery.timeago.settings.strings = {
 		 });
 	}
 	
+	function openInternal() {
+		$("#internal-button").prop('disabled', true);
+		 $.ajax({
+            url: "{% url 'control' 'internal' %}",
+            type: 'POST',
+            dataType: 'json',
+            success: function(){},
+            error: function() {
+            	$("#internal-button").prop('disabled', false);
+            }
+		 });
+	}
+	
 	function updateLabel(label_id, state) {
 		 $(label_id).removeClass("label-default");
     	 $(label_id).removeClass("label-warning");
@@ -89,6 +102,7 @@ jQuery.timeago.settings.strings = {
 
 	function waitRing(response) {
 		
+		$("#external-button").prop('disabled', true);
 		var endpoint = "{% url 'control' 'external' %}" + "?req_id=" + response.req_id;
 		var interval = setInterval(function() {
 			 $.ajax({
@@ -102,6 +116,7 @@ jQuery.timeago.settings.strings = {
 	             },
 	             error: function (xhr, status) {
 	            	 setError("#external-status");
+	            	 $("#external-button").prop('disabled', false);
 	             }
 			 });
 		}, 1000);
@@ -122,7 +137,7 @@ jQuery.timeago.settings.strings = {
 		});
 		
 		$.ajax({
-			url : "{% url 'requests' %}" + "?limit=5",
+			url : "{% url 'requests' 'internal' %}" + "?limit=5",
 			type : 'GET',
 			dataType : 'json',
 			success : function(response) {
@@ -229,7 +244,7 @@ margin-top: 8px;
 				</div>
 				<div class="panel-body">
 					<div style="float: left"><h3><span class="label label-default" id="internal-status">closed</span></h3></div>
-					<div style="float: right"><button class="btn btn-lg btn-default" type="button" disabled="">Apri</button></div>
+					<div style="float: right"><button id="internal-button" onclick="openInternal()" {{ options }} class="btn btn-lg btn-primary" type="button">Apri</button></div>
 				</div>
 			</div>
 			
@@ -239,7 +254,7 @@ margin-top: 8px;
 				</div>
 				<div class="panel-body">
 					<div style="float: left"><h3><span class="label label-default" id="external-status">closed</span></h3></div>
-					<div style="float: right"><button onclick="openExternal()" class="btn btn-lg btn-primary" type="button">Apri</button></div>
+					<div style="float: right"><button id="external-button" onclick="openExternal()" class="btn btn-lg btn-primary" type="button">Apri</button></div>
 				</div>
 			</div>
 		

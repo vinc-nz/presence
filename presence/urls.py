@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', name='logout'),
     url(r'^gates/(?P<gate_name>\w{0,50})/$', 'gatecontrol.views.gatecontrol', name='control'),
     url(r'^gates/$', 'gatecontrol.views.get_all_states', name='gates'),
-    url(r'^requests/$', 'gatecontrol.views.show_requests', name='requests'),
+    url(r'^requests/(?P<gate_name>\w{0,50})/$', 'gatecontrol.views.show_requests', name='requests'),
     url(r'^about/$', 'hlcs.views.about', name='about'),
     url(r'^$', 'hlcs.views.homepage', name='home'),
 )

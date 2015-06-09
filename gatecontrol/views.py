@@ -14,7 +14,7 @@ def get_all_states(request):
     response = []
     for g in gates.keys():
         response.append({g : gates[g].get_state()})
-    return render_json(response)
+    return JsonResponse(response, safe=False)
 
 @api_view(['GET', 'POST'])
 def gatecontrol(request, gate_name):
@@ -23,39 +23,26 @@ def gatecontrol(request, gate_name):
         raise Http404
     gate = gates[gate_name]
     if request.method == 'GET':
-        return get_state(gate, request.GET.get('req_id', None))
+        return _get_state(gate, request.GET.get('req_id', None))
     elif request.method == 'POST':
-        return open_gate(request.user, gate)
+        r = AccessRequest.objects.get_or_create(request.user, request.META.get('HTTP_X_FORWARDED_FOR'), gate, gate_name)
+        return JsonResponse({ 'req_id' : r.id })
 
 @api_view(['GET'])
-def show_requests(request):
+def show_requests(request, gate_name):
     try:
         limit = int(request.GET.get('limit', '10'))
     except ValueError:
         return HttpResponseBadRequest()
-    access_requests = AccessRequest.objects.get_last_accesses(limit)
+    access_requests = AccessRequest.objects.get_last_accesses(gate_name, limit)
     response = []
     for r in access_requests:
         response.append({ 'time' : r.req_time.strftime('%Y-%m-%dT%H:%M:%S'), 'user' : r.user.username})
-    return render_json(response)
-
-### UTILITY METHODS ###
-
-def render_json(response):
     return JsonResponse(response, safe=False)
 
 
-def open_gate(user, gate):
-    if not user.is_authenticated():
-        return HttpResponseForbidden()
-    r = AccessRequest.objects.get_pending_request()
-    if r is None:
-        r = AccessRequest.objects.create(user)
-    gate.open_gate(r)
-    response = { 'req_id' : r.id }
-    return render_json(response)
   
-def get_state(gate, access_request_id):
+def _get_state(gate, access_request_id):
     if access_request_id is not None:
         try:
             req_id = int(access_request_id)
@@ -65,7 +52,7 @@ def get_state(gate, access_request_id):
     else:
         r = None
     state = gate.get_state(r)
-    return render_json(state)
+    return JsonResponse(state)
 
 
     
