@@ -137,17 +137,12 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-       
+
     },
 }
 
 
-GATES = {'test' : Gate()}
-
-
 try:
-    from .local_settings import *
+    from presence.local_settings import *
 except ImportError:
     pass
-
-

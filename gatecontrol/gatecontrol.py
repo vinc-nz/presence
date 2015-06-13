@@ -9,21 +9,24 @@ STATE_OPEN = {'id' : 1, 'description' : 'open'}
 
 
 class Gate:
-    
+
     def __init__(self):
         self.state = STATE_CLOSED
-    
-    def open_gate(self, request=None):
-        if request is not None:
-            self.state = STATE_OPEN
-            request.done()
-    
-    def get_state(self, request=None):
+
+    def install(self):
+        pass
+
+    def open_gate(self, request):
+        if request is None:
+            raise Exception('Access Request is None')
+        self.state = STATE_OPEN
+        request.done()
+
+    def read_state(self):
         return self.state
-    
+
     def is_open(self):
-        return self.get_state() == STATE_OPEN
-    
+        return self.read_state() == STATE_OPEN
+
     def get_available_states(self):
         return (STATE_OPEN, STATE_CLOSED)
-    
