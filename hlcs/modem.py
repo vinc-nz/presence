@@ -165,3 +165,13 @@ class AtlantisModemController(threading.Thread, ModemController):
         except Exception as e:
             logger.exception(e)
             self.request.fail(str(e))
+            
+            
+if __name__ == '__main__':
+    m=AtlantisModem()
+    m.check_connection()
+    controller=m.get_controller()
+    controller.setup(None)
+    loop = asyncio.get_event_loop()
+    loop.run_forever()
+    loop.close()
