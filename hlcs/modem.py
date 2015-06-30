@@ -123,7 +123,7 @@ class AtlantisModemController(threading.Thread, ModemController):
 
             self.serial.setTimeout(timeout)
             loop = asyncio.get_event_loop()
-            loop.add_reader(AtlantisModem.PORT, self.run)
+            loop.add_reader(self.serial.fileno(), self.run)
             logger.debug('setup complete, controller in listen mode')
             
 
