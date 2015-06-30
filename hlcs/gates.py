@@ -37,9 +37,11 @@ class HpccExternal(Gate):
         if request is None:
             raise Exception('Access Request is None')
         self.controller = self.modem.get_controller()
-        self.controller.setup(request)
+        self.controller.setup(request, self.reset_state)
         self.state = STATE_RING
-        self.controller.start()
+        
+    def reset_state(self):
+        self.state = STATE_UNKNOWN
 
 
 

@@ -16,10 +16,11 @@ class TestAtlantisModemController(TestCase):
         serial = Mock()
         serial.readline = MagicMock(return_value=modem.MSG_OK)
         controller = modem.AtlantisModemController(serial)
+        controller.add_reader = MagicMock()
         controller.setup(request)
         serial.read = MagicMock(return_value=modem.MSG_RING)
         serial.readline = MagicMock(return_value=modem.MSG_BUSY)
-        controller.run()
+        controller.handle_ring()
         request.done.assert_called_with()
         
     def testFail(self):
@@ -33,6 +34,7 @@ class TestAtlantisModemController(TestCase):
             serial.read = MagicMock(return_value=None)
             
         controller = modem.AtlantisModemController(serial)
+        controller.add_reader = MagicMock()
         controller.setup(request)
-        controller.run()
+        controller.handle_ring()
         request.fail.assert_called_with('no RING received')

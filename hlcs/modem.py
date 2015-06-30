@@ -17,8 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
 import sys
-import threading
-import time
 
 import serial, logging
 
@@ -43,8 +41,16 @@ class Modem:
 
 class ModemController:
 
-    def setup(self, request):
+    def setup(self, request, callback=None):
         self.request = request
+        self.callback = callback
+            
+    def on_exit(self):
+        if self.callback:
+            self.callback()
+        
+    def handle_ring(self):
+        pass
 
 class DummyModem(Modem):
 
@@ -52,15 +58,13 @@ class DummyModem(Modem):
         return DummyController()
 
 
-class DummyController(threading.Thread, ModemController):
+class DummyController(ModemController):
 
     WAIT = 10
 
-    def run(self):
-        threading.Thread.run(self)
-        time.sleep(DummyController.WAIT)
-        self.request.done()
-
+    def setup(self, request, callback=None):
+        ModemController.setup(self, request, callback)
+        asyncio.get_event_loop().call_later(DummyController.WAIT,  self.on_exit)
 
 
 class AtlantisModem(Modem):
@@ -88,17 +92,19 @@ class AtlantisModem(Modem):
 
 
 
-class AtlantisModemController(threading.Thread, ModemController):
+class AtlantisModemController(ModemController):
 
 
     def __init__(self, serial):
-        threading.Thread.__init__(self)
         self.serial = serial
 
+    def add_reader(self):
+        loop = asyncio.get_event_loop()
+        loop.add_reader(self.serial.fileno(), self.handle_ring)
 
-    def setup(self, request, timeout=60):
+    def setup(self, request, timeout=60, callback=None):
 
-        self.request = request
+        ModemController.setup(self, request, callback)
 
         try:
 
@@ -122,8 +128,7 @@ class AtlantisModemController(threading.Thread, ModemController):
                         raise IOError( 'error at comand: %s' % c )
 
             self.serial.setTimeout(timeout)
-            loop = asyncio.get_event_loop()
-            loop.add_reader(self.serial.fileno(), self.run)
+            self.add_reader()
             logger.debug('setup complete, controller in listen mode')
             
 
@@ -135,7 +140,7 @@ class AtlantisModemController(threading.Thread, ModemController):
             logger.exception(e)
             self.request.fail(str(e))
 
-    def run(self):
+    def handle_ring(self):
         try:
             logger.debug( 'modem in listen mode' )
 
@@ -165,6 +170,8 @@ class AtlantisModemController(threading.Thread, ModemController):
         except Exception as e:
             logger.exception(e)
             self.request.fail(str(e))
+            
+        self.on_exit()
             
             
 if __name__ == '__main__':
