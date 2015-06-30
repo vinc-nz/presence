@@ -15,6 +15,11 @@ class Gate:
 
     def install(self):
         pass
+    
+    def can_open(self, **kwargs):
+        if self.is_open():
+            return (False, 'Gate is already open')
+        return (True, None)
 
     def open_gate(self, request):
         if request is None:

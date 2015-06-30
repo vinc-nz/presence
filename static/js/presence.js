@@ -3,7 +3,7 @@
  */
 
 var app = angular.module('presence-web', []);
-app.controller('presence-controller', function($scope, $http) {
+app.controller('presence-controller', function($scope, $location, $http) {
 	$scope.gates = [ {
 		id : "internal",
 		label : "Porta Interna",
@@ -26,18 +26,11 @@ app.controller('presence-controller', function($scope, $http) {
 		}
 	} ];
 
-	$scope.access_list = [ {
-		"time" : "2015-06-13T15:05:45",
-		"user" : "alivin70"
-	} ];
+	$scope.access_list = [ ];
 	
-	$scope.toggle = function() {
-        $scope.myVar = !$scope.myVar;
-    };
-    
     $scope.open_gate = function(gate) {
     	var token = "Token " + localStorage.getItem("token");
-    	$http.post("http://localhost:8000/gates/" + gate.id + "/", null, {
+    	$http.post("/gates/" + gate.id + "/", null, {
     	    headers: {'Authorization': token}
     	});
     };
@@ -47,7 +40,7 @@ app.controller('presence-controller', function($scope, $http) {
     }
     
     $scope.login = function() {
-    	$http.post("http://localhost:8000/api-token-auth/", $scope.user).success(function(data){
+    	$http.post("/api-token-auth/", $scope.user).success(function(data){
     		localStorage.setItem("token", data.token);
     	});
     }
@@ -56,15 +49,31 @@ app.controller('presence-controller', function($scope, $http) {
     		localStorage.removeItem("token");
     }
 
-	var ws = new WebSocket("ws://localhost:8000/socket");
+	var ws = new WebSocket("ws://" + $location.host() + ":" + $location.port() + "/socket");
 	ws.onmessage = function(event) {
+		console.log(event.data);
 		var message = JSON.parse(event.data);
 		$scope.gates.map(function(gate) {
 			var newstate = message[gate.id];
 			gate.state.label = newstate.description;
 			gate.state.cssClass = getStateCssClasses(newstate.id);
-			gate.button.disabled = newstate.id > 0;
 		});
+		
+		var token = "Token " + localStorage.getItem("token");
+		$http.get("/gates/internal/requests/", {
+    	    headers: {'Authorization': token}
+    	}).success(function(data){
+    		$scope.access_list = data;
+    	});
+		
+		$http.get("/capabilities/", {
+    	    headers: {'Authorization': token}
+    	}).success(function(data){
+    		$scope.gates.map(function(gate) {
+    			gate.button.disabled = data[gate.id] == false;
+    		});
+    	});
+		
 		$scope.$apply();
 	}
 

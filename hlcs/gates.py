@@ -23,7 +23,7 @@ class HpccExternal(Gate):
             self.modem = AtlantisModem()
         else:
             self.modem = modem
-
+            
     def install(self):
         self.modem.check_connection()
 
@@ -34,6 +34,8 @@ class HpccExternal(Gate):
         return (STATE_UNKNOWN, STATE_RING)
 
     def open_gate(self, request):
+        if request is None:
+            raise Exception('Access Request is None')
         self.controller = self.modem.get_controller()
         self.controller.setup(request)
         self.state = STATE_RING
@@ -60,18 +62,25 @@ class HpccInternal(Gate):
         is_open = self.magnet_input()
         return STATE_OPEN if is_open else STATE_CLOSED
 
-    def is_from_local_address(self, request):
+    def _ip_is_authorized(self, address):
         pattern = getattr(settings, 'IP_PATTERN', '10.87.1.\d+')
-        return re.match(pattern, request.address)
+        return re.match(pattern, address)
+    
+    def can_open(self, **kwargs):
+        if self.is_open():
+            return (False, 'Gate is already open')
+        if not 'ip_address' in kwargs or not self._ip_is_authorized(kwargs['ip_address']):
+            return (False, 'Ip address not authorized')
+        if not 'user' in kwargs or not kwargs['user'].is_staff():
+            return (False, 'User has not this capability')
+        return (True, None)
 
     def open_gate(self, request=None):
-        if request is not None:
-            if self.is_open():
-                request.fail('Gate already open')
-            elif not self.is_from_local_address(request):
-                request.fail('Source is not local')
-            elif request.user.is_staff:
-                self.send_open_pulse()
-                request.done()
-            else:
-                request.fail('Access denied')
+        if request is None:
+            raise Exception('Access Request is None')
+        (is_authorized, msg) = self.can_open(user=request.user, ip_address=request.address)
+        if not is_authorized:
+            request.fail(msg)
+            raise Exception(msg)
+        self.send_open_pulse()
+        request.done()
