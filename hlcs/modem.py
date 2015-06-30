@@ -15,11 +15,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import asyncio
 import sys
 import threading
+import time
 
 import serial, logging
-import time
 
 
 logger = logging.getLogger(__name__)
@@ -121,7 +122,10 @@ class AtlantisModemController(threading.Thread, ModemController):
                         raise IOError( 'error at comand: %s' % c )
 
             self.serial.setTimeout(timeout)
+            loop = asyncio.get_event_loop()
+            loop.add_reader(AtlantisModem.PORT, self.run)
             logger.debug('setup complete, controller in listen mode')
+            
 
         except Exception as e:
             try:
@@ -135,6 +139,7 @@ class AtlantisModemController(threading.Thread, ModemController):
         try:
             logger.debug( 'modem in listen mode' )
 
+            
             lineIn = self.serial.read(len(MSG_RING))
             if lineIn == MSG_RING:
                 logger.debug( 'RING received' )
