@@ -37,10 +37,8 @@ class StateMonitor:
 
 class ClientSocket(websocket.WebSocketHandler):
     def open(self):
-        print('socket aperto')
         clients.append(self)
         self.write_message(read_all_states())
 
     def on_close(self):
-        print('socket chiuso')
         clients.remove(self)

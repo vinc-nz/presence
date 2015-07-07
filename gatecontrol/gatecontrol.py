@@ -21,11 +21,18 @@ class Gate:
             return (False, 'Gate is already open')
         return (True, None)
 
+    def handle_request(self, request):
+        self.state = STATE_OPEN
+        request.done()
+
     def open_gate(self, request):
         if request is None:
             raise Exception('Access Request is None')
-        self.state = STATE_OPEN
-        request.done()
+        (is_authorized, msg) = self.can_open(user=request.user, ip_address=request.address)
+        if not is_authorized:
+            request.fail(msg)
+            raise Exception(msg)
+        self.handle_request(request)
 
     def read_state(self):
         return self.state

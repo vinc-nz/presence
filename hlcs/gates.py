@@ -33,15 +33,18 @@ class HpccExternal(Gate):
     def get_available_states(self):
         return (STATE_UNKNOWN, STATE_RING)
 
-    def open_gate(self, request):
-        if request is None:
-            raise Exception('Access Request is None')
+    def handle_request(self, request):
         self.controller = self.modem.get_controller()
         self.controller.setup(request, self.reset_state)
         self.state = STATE_RING
         
     def reset_state(self):
         self.state = STATE_UNKNOWN
+        
+    def can_open(self, **kwargs):
+        if self.state == STATE_RING:
+            return (False, 'Pending request already present')
+        return Gate.can_open(self, **kwargs)
 
 
 
@@ -69,20 +72,12 @@ class HpccInternal(Gate):
         return re.match(pattern, address)
     
     def can_open(self, **kwargs):
-        if self.is_open():
-            return (False, 'Gate is already open')
         if not 'ip_address' in kwargs or not self._ip_is_authorized(kwargs['ip_address']):
             return (False, 'Ip address not authorized')
         if not 'user' in kwargs or not kwargs['user'].is_staff():
             return (False, 'User has not this capability')
-        return (True, None)
+        return Gate.can_open(self, **kwargs)
 
-    def open_gate(self, request=None):
-        if request is None:
-            raise Exception('Access Request is None')
-        (is_authorized, msg) = self.can_open(user=request.user, ip_address=request.address)
-        if not is_authorized:
-            request.fail(msg)
-            raise Exception(msg)
+    def handle_request(self, request):
         self.send_open_pulse()
         request.done()

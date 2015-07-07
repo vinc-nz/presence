@@ -51,7 +51,6 @@ app.controller('presence-controller', function($scope, $location, $http) {
 
 	var ws = new WebSocket("ws://" + $location.host() + ":" + $location.port() + "/socket");
 	ws.onmessage = function(event) {
-		console.log(event.data);
 		var message = JSON.parse(event.data);
 		$scope.gates.map(function(gate) {
 			var newstate = message[gate.id];
@@ -75,15 +74,13 @@ app.controller('presence-controller', function($scope, $location, $http) {
     	});
 		
 		$scope.$apply();
+		
+		$(".timeago").timeago();
 	}
 
 });
 
 
-angular.element(document).ready(function() {
-	$(".timeago").timeago();
-
-});
 
 function getStateCssClasses(value) {
 	if (value == 0) {
