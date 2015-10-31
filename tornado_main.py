@@ -13,28 +13,25 @@ from tornado.ioloop import IOLoop
 from tornado.platform.asyncio import AsyncIOMainLoop
 import tornado.wsgi
 
-import gatecontrol.notification as notification
+import gatecontrol.socket as socket
 
 
 django.setup()
 
 
-
-
 def main():
     AsyncIOMainLoop().install()
-    map(lambda g : g.install(), getattr(settings, 'GATES').values())
     wsgi_app = tornado.wsgi.WSGIContainer(
         django.core.handlers.wsgi.WSGIHandler()
     )
     tornado_app = tornado.web.Application([
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': 'static'}),
-        (r"/socket", notification.ClientSocket),
+        (r"/socket", socket.ClientSocket),
         ('.*', tornado.web.FallbackHandler, dict(fallback=wsgi_app)),
     ], debug=settings.DEBUG)
     server = tornado.httpserver.HTTPServer(tornado_app)
     server.listen(8000)
-    sched = tornado.ioloop.PeriodicCallback(notification.StateMonitor().notify_changes, 1000, io_loop=IOLoop.instance())
+    sched = tornado.ioloop.PeriodicCallback(socket.StateMonitor().notify_changes, 1000, io_loop=IOLoop.instance())
     sched.start()
     asyncio.get_event_loop().run_forever()
 

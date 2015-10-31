@@ -1,4 +1,4 @@
--   fields: {info: '', req_state: OK, req_time: !!timestamp '2015-03-01 21:01:47.057261', gate : 'test',
+-   fields: {info: '', req_state: OK, req_time: !!timestamp '2015-03-01 21:01:47.057261', gate : 1,
         user: 1}
     model: gatecontrol.accessrequest
     pk: 1

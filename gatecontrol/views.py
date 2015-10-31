@@ -1,51 +1,50 @@
 
 from django.conf import settings
-from django.http.response import  Http404, HttpResponseForbidden, \
-    HttpResponseBadRequest, JsonResponse
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import api_view, authentication_classes, \
-    permission_classes
-from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+import jwt
 
-from gatecontrol.models import AccessRequest
+from gatecontrol.models import Gate
 
 
-gates = getattr(settings, 'GATES', {})
+JWT_SECRET = getattr(settings, 'JWT_SECRET', 'secret')
 
 
-ip_address = lambda request : request.META.get('HTTP_X_FORWARDED_FOR')or request.META.get('REMOTE_ADDR')
+class ApiView:
+    
+    def __init__(self, ip_address):
+        self.user = None
+        self.ip_address = ip_address
+        
+    @staticmethod
+    def _create_token(username):
+        return jwt.encode({'username':username}, JWT_SECRET, algorithm='HS256')
+    
+    def authenticate(self, token):
+        token_data = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+        if 'username' in token_data:
+            try:
+                self.user = User.objects.get(username=token_data['username'])
+                return True
+            except User.DoesNotExist:
+                pass
+        return False
 
-@api_view(['POST'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((IsAuthenticated,))
-def gatecontrol(request, gate_name):
-    capabilities = _user_capabilities(request)
-    if gate_name not in capabilities:
-        raise Http404
-    if not capabilities[gate_name]:
-        return HttpResponseForbidden()
-    r = AccessRequest.objects.get_or_create(request.user,  ip_address(request), gate_name)
-    return JsonResponse({ 'req_state' : r.req_state })
+    def _serialize_gate(self, gate):
+        gate_controller = gate.controller()
+        return {'id': gate.id, 'name': gate.name, 'state': gate_controller.get_state(), 'managed': gate_controller.is_managed_by_user(self.user, self.ip_address)}
+    
+    
+    def list_gates(self):
+        return list(map(self._serialize_gate, Gate.objects.all()))
+    
+    def open(self, gate_id):
+        return Gate.objects.get(id=gate_id).request_opening(self.user, self.ip_address)
+        
 
 
-@api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((IsAuthenticated,))
-def show_requests(request, gate_name):
-    try:
-        limit = int(request.GET.get('limit', '10'))
-    except ValueError:
-        return HttpResponseBadRequest()
-    access_requests = AccessRequest.objects.get_last_accesses(gate_name, limit)
-    to_json = lambda r : { 'time' : r.req_time.strftime('%Y-%m-%dT%H:%M:%S'), 'user' : r.user.username}
-    return JsonResponse(list(map(to_json, access_requests)), safe=False)
+@login_required
+def obtain_auth_token(request):
+    return ApiView._create_token(request.user.username)
 
 
-def _user_capabilities(request):
-    return { name: gate.can_open(user=request.user, ip_address=ip_address(request))[0] for name, gate in gates.items() }
-
-@api_view(['GET'])
-@authentication_classes((TokenAuthentication,))
-@permission_classes((IsAuthenticated,))
-def show_user_capabilities(request):
-    return JsonResponse(_user_capabilities(request))

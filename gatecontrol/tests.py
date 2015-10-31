@@ -1,59 +1,55 @@
-import json
-import time
+from django.test.testcases import TestCase
 
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.test import TestCase, Client
-from mock import MagicMock
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase
-
-from gatecontrol.gatecontrol import Gate, STATE_CLOSED
-from gatecontrol.models import AccessRequest
+from gatecontrol.models import GateController, AccessRequest
+from gatecontrol.views import ApiView
 
 
-class TestViews(APITestCase):
-    fixtures = ['users.yml', 'requests.yml']
+class GateControllerStub(GateController):
     
-    def parse_response(self, response):
-        self.assertEqual(200, response.status_code)
-        return json.loads(response.content.decode())
+    def __init__(self):
+        self.state = 'closed'
+    
+    def is_managed_by_user(self, user, ip_address):
+        return True if user else False
+    
+    def get_state(self):
+        return self.state
+    
+    def handle_request(self, access_request):
+        if self.is_managed_by_user(access_request.user, access_request.address):
+            self.state = 'open'
+            return True
+        return False
+        
+        
+class TestDriven(TestCase):
+    
+    fixtures = ['gates.yml', 'users.yml']
     
     def setUp(self):
-        APITestCase.setUp(self)
-        mock = Gate()
-        mock.get_state = MagicMock(return_value=STATE_CLOSED)
-        mock.open_gate = MagicMock()
-        setattr( settings, 'GATES', {'test' : mock } )
-        self.client.force_authenticate(user=User.objects.get(pk=1))
+        self.view = ApiView('192.168.1.1')
     
-    def test_gatecontrol(self):
-        expected = {"req_state": 'PENDING'}
-        response = self.client.post(reverse('control', args=('test',)))
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(expected, self.parse_response(response))
+    def test_should_return_the_list_of_gates(self):
+        expected = [{
+            'id' : 1,
+            'name' : 'Testgate',
+            'state' : 'closed',
+            'managed': False
+        }]
+        self.assertEqual(expected, self.view.list_gates())
         
-    def test_show_requests(self):
-        response = self.client.get(reverse('requests',  args=('test',) ))
-        self.assertEqual(200, response.status_code)
-        actual = self.parse_response(response)[0]
-        expected = {"user": "admin", "time": "2015-03-01T17:28:18"}
-        self.assertEqual(expected.keys(), actual.keys())
+    def test_should_authenticate_user(self):
+        token = ApiView._create_token('admin')
+        self.assertTrue(self.view.authenticate(token))
         
-    def test_show_user_capabilities(self):
-        response = self.client.get(reverse('capabilities' ))
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(json.dumps({'test' : True}), response.content.decode())
+    def test_authenticated_user_should_manage_gate(self):
+        token = ApiView._create_token('admin')
+        self.view.authenticate(token)
+        result = self.view.list_gates()
+        self.assertTrue(result[0]['managed'])
         
-    
-
-class TestManager(TestCase):
-    fixtures = ['users.yml', 'requests.yml']
-    
-    def setUp(self):
-        TestCase.setUp(self)
-        
-    def test_get_last_accesses(self):
-        accesses = AccessRequest.objects.get_last_accesses('test')
-        self.assertEqual([1], [a.id for a in accesses])
+    def test_authenticated_user_make_an_access_request(self):
+        token = ApiView._create_token('admin')
+        self.view.authenticate(token)
+        self.view.open(1)
+        self.assertEqual(1, AccessRequest.objects.all().count())

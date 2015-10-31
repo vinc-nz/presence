@@ -1,0 +1,5 @@
+- fields:
+    name: Testgate  
+    controller_class: gatecontrol.tests.GateControllerStub
+  model: gatecontrol.Gate
+  pk: 1
