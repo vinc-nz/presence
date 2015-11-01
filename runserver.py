@@ -5,6 +5,13 @@ Created on 09/giu/2015
 '''
 
 import asyncio
+import importlib
+import os
+
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "presence.settings")
+django.setup()
 
 from django.conf import settings
 import django.core.handlers.wsgi
@@ -16,10 +23,19 @@ import tornado.wsgi
 import gatecontrol.socket as socket
 
 
-django.setup()
 
 
-def main():
+
+
+def setup_gates():
+    gate_setup_func = getattr(settings, 'GATE_SETUP_FUNCTION', None)
+    if gate_setup_func:
+        module_name, function_name = gate_setup_func.rsplit(".", 1)
+        the_function = getattr(importlib.import_module(module_name), function_name)
+        the_function()
+
+def runserver():
+    setup_gates()
     AsyncIOMainLoop().install()
     wsgi_app = tornado.wsgi.WSGIContainer(
         django.core.handlers.wsgi.WSGIHandler()
@@ -36,4 +52,4 @@ def main():
     asyncio.get_event_loop().run_forever()
 
 if __name__ == '__main__':
-    main()
+    runserver()

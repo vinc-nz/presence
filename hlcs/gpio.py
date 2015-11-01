@@ -21,9 +21,10 @@ PULSE_SLEEP = getattr(settings, 'PULSE_SLEEP', 1)
 PULSE_ON = getattr(settings, 'PULSE_ON', 0)
 PULSE_OFF = getattr(settings, 'PULSE_OFF', 1)
 
-GPIO.setup(LOCK_PIN, GPIO.OUT, initial=PULSE_OFF)
-GPIO.setup(MAGNET_PIN, GPIO.IN)  
-    
+
+def setup():
+    GPIO.setup(LOCK_PIN, GPIO.OUT, initial=PULSE_OFF)
+    GPIO.setup(MAGNET_PIN, GPIO.IN)  
 
 
 def magnet_input():

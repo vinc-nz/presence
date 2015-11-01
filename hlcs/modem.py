@@ -77,12 +77,9 @@ class AtlantisModem(Modem):
         return serial.Serial(AtlantisModem.PORT, baudrate=AtlantisModem.BAUDRATE)
 
     def check_connection(self):
-        try:
-            s = self._get_serial()
-            s.close()
-        except Exception as e:
-            print ('ERROR: %s: %s' % (__name__, str(e)))
-            sys.exit(1)
+        s = self._get_serial()
+        s.close()
+        
 
     def get_controller(self):
         logger.debug( 'opening serial port..' )

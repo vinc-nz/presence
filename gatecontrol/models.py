@@ -30,9 +30,16 @@ class Gate(models.Model):
     
     def request_opening(self, user, address):
         logger.info('user %s requested access' % user.username)
-        access_request = AccessRequest( user = user, gate=self, address=address )
-        self.controller().handle_request(access_request)
-        access_request.save()
+        gate_controller = self.controller()
+        if gate_controller.is_managed_by_user(user, address):
+            access_request = AccessRequest( user = user, gate=self, address=address )
+            try:
+                gate_controller.handle_request(access_request)
+                access_request.save()
+            except Exception as e:
+                access_request.fail(e.get_info())
+                access_request.save()
+                raise e
         
     def get_last_accesses(self, limit):
         self.accessrequest.filter(req_state=REQUEST_STATE_OK).order_by('-req_time')[:limit]

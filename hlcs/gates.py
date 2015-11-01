@@ -4,39 +4,46 @@ Created on 08/nov/2014
 @author: spax
 '''
 
-import sys
-
-from hlcs.modem import AtlantisModem
-from django.conf import settings
 import re
-from gatecontrol.models import GateController, GATE_STATE_OPEN,\
+import sys
+import traceback
+
+from django.conf import settings
+
+from gatecontrol.models import GateController, GATE_STATE_OPEN, \
     GATE_STATE_CLOSED
+from hlcs.modem import AtlantisModem
 
 
 GATE_STATE_RING = 'ring'
 GATE_STATE_UNKNOWN =  'unknown'
 
+def setup():
+    try:
+        HpccExternal.setup()
+        HpccInternal.setup()
+    except Exception as e:
+        traceback.print_exc()
+        exit(1)
+
 class HpccExternal(GateController):
     
-    state = 'unknown'
+    state = GATE_STATE_UNKNOWN
+    
+    @classmethod
+    def setup(cls):
+        AtlantisModem().check_connection()
 
     def __init__(self, modem=None):
-        self.state = GATE_STATE_UNKNOWN
-        if modem is None:
-            self.modem = AtlantisModem()
-        else:
-            self.modem = modem
+        self.modem = AtlantisModem()
             
     def get_state(self):
-        return HpccExternal.state
+        return self.state
 
     def handle_request(self, access_request):
-        if self.is_managed_by_user(access_request.user, access_request.address):
-            self.controller = self.modem.get_controller()
-            self.controller.setup(access_request, self.reset_state)
-            HpccExternal.state = GATE_STATE_RING
-        else:
-            access_request.fail('Forbidden')
+        self.controller = self.modem.get_controller()
+        self.controller.setup(access_request, self.reset_state)
+        self.state = GATE_STATE_RING
         
     def reset_state(self):
         self.state = GATE_STATE_UNKNOWN
@@ -53,17 +60,13 @@ class HpccExternal(GateController):
 
 class HpccInternal(GateController):
 
-    def __init__(self):
-        pass
 
-    def install(self):
-        try:
-            from hlcs.gpio import magnet_input, send_open_pulse
-            self.magnet_input = magnet_input
-            self.send_open_pulse = send_open_pulse
-        except Exception as e:
-            print ('ERROR: could not setup %s: %s' % (HpccInternal.__name__, str(e)))
-            sys.exit(1)
+    @classmethod
+    def setup(cls):
+        from hlcs.gpio import setup, magnet_input, send_open_pulse
+        setup()
+        cls.magnet_input = magnet_input
+        cls.send_open_pulse = send_open_pulse
 
     def get_state(self):
         is_open = self.magnet_input()
@@ -83,8 +86,6 @@ class HpccInternal(GateController):
         return True
 
     def handle_request(self, access_request):
-        if self.is_managed_by_user(access_request.user, access_request.address):
-            self.send_open_pulse()
-            access_request.done()
-        else:
-            access_request.fail('Forbidden')
+        self.send_open_pulse()
+        access_request.done()
+           
