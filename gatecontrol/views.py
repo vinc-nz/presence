@@ -25,10 +25,10 @@ class ApiView:
         if 'username' in token_data:
             try:
                 self.user = User.objects.get(username=token_data['username'])
-                return True
+                return 'success'
             except User.DoesNotExist:
-                pass
-        return False
+                raise Exception('User does not exists')
+        raise Exception('not a valid token')
 
     def _serialize_gate(self, gate):
         gate_controller = gate.controller()

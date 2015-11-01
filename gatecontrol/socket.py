@@ -4,11 +4,14 @@ Created on 10/giu/2015
 @author: spax
 '''
 
+import json
+import sys
+import traceback
+
 from tornado import websocket
+
 from gatecontrol.models import Gate
-
 from gatecontrol.views import ApiView
-
 
 
 class StateMonitor:
@@ -38,17 +41,34 @@ class ClientSocket(websocket.WebSocketHandler):
     
     def open(self):
         StateMonitor.clients.append(self)
-        self.api = ApiView()
+        self.api = ApiView(self.request.remote_ip)
+        self.push_info()
         
+
+    def _call_api_method(self, method_name, args={}):
+        method = getattr(self.api, method_name)
+        try:
+            response = method(**args)
+            message = {'type':method_name, 'content':response}
+            self.write_message(message)
+        except Exception as e:
+            self.write_message({'type':'error', 'content': e.get_info()})
+
     def on_message(self, message):
         try:
-            method = getattr(self.api, message['method'])
-            return method(message['args'])
-        except Exception:
-            pass
+            if isinstance(message, str):
+                message = json.loads(message)
+            method_name = message['method']
+            args = message['args']
+            self._call_api_method(method_name, args)
+        except:
+            self.write_message({'type':'error', 'content': 'invalid message received'})
         
     def push_info(self):
-        self.write_message(self.api.list_gates())
+        self._call_api_method('list_gates')
 
     def on_close(self):
         StateMonitor.clients.remove(self)
+        
+    def check_origin(self, origin):
+        return True
