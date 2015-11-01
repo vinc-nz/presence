@@ -1,9 +1,7 @@
 
-import datetime
 import importlib
 import logging
 
-from django.conf import settings as settings
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -36,10 +34,12 @@ class Gate(models.Model):
             try:
                 gate_controller.handle_request(access_request)
                 access_request.save()
+                return True
             except Exception as e:
-                access_request.fail(e.get_info())
+                access_request.fail(str(e))
                 access_request.save()
                 raise e
+        raise Exception('Unauthorized')
         
     def get_last_accesses(self, limit):
         self.accessrequest.filter(req_state=REQUEST_STATE_OK).order_by('-req_time')[:limit]

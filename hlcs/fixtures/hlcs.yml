@@ -1,0 +1,11 @@
+- fields:
+    name: internal  
+    controller_class: hlcs.gates.HpccInternal
+  model: gatecontrol.Gate
+  pk: 1
+- fields:
+    name: internal  
+    controller_class: hlcs.gates.HpccExternal
+  model: gatecontrol.Gate
+  pk: 2
+  

@@ -2,16 +2,17 @@ from functools import partial
 from functools import partial
 import json
 
+from django.contrib.auth.models import User
 from django.contrib.staticfiles import testing
 from django.test.testcases import TestCase
 from tornado.testing import AsyncHTTPTestCase
 from tornado.web import Application
 from ws4py.client.tornadoclient import TornadoWebSocketClient
 
-from gatecontrol import socket
+from gatecontrol.handlers import SocketHandler, TokenHandler
 from gatecontrol.models import GateController, AccessRequest
-from gatecontrol.socket import ClientSocket
 from gatecontrol.views import ApiView
+from django.contrib.auth import authenticate
 
 
 class GateControllerStub(GateController):
@@ -93,16 +94,37 @@ class AsyncWSClient(TornadoWebSocketClient):
 
 class WebSocketTest(AsyncHTTPTestCase):
     
+    @classmethod
+    def setUpClass(cls):
+        super(WebSocketTest, cls).setUpClass()
+        user = User.objects.create(username='test')
+        user.set_password('secret')
+        user.save()
+    
     def get_app(self):
-        return Application([('/', socket.ClientSocket)])
+        return Application([('/token', TokenHandler), ('/socket', SocketHandler)])
 
     def test_should_return_the_list_of_gates(self):
         """first test function"""
-        url = self.get_url('/').replace('http', 'ws')
+        url = self.get_url('/socket').replace('http', 'ws')
         client = AsyncWSClient(url, self.io_loop)
         client.sendMessage(json.dumps({'method': 'list_gates', 'args': {}}), self.stop)
 
         response = json.loads(self.wait().decode())
         self.assertEqual({'type': 'list_gates', 'content': []}, response)
+        
+    def test_should_issue_token(self):
+        auth_request = {'username': 'test', 'password': 'secret'}
+        self.http_client.fetch(self.get_url('/token'), self.stop, method="POST", body=json.dumps(auth_request))
+        response = json.loads(self.wait().body.decode())
+        self.assertEqual('token', response['type'])
+        
+    def test_should_authenticate_user(self):
+        url = self.get_url('/socket').replace('http', 'ws')
+        client = AsyncWSClient(url, self.io_loop)
+        token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QifQ.FILrByQNl1Mx00RSZonmT3p5waGlFaymZJ3e3a5VBac'
+        client.sendMessage(json.dumps({'method': 'authenticate', 'args': {'token': token}}), self.stop)
+        response = json.loads(self.wait().decode())
+        self.assertEqual({'type': 'authenticate', 'content': 'success'}, response)
 
 

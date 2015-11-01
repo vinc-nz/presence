@@ -1,6 +1,5 @@
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 import jwt
 
@@ -43,8 +42,5 @@ class ApiView:
         
 
 
-@login_required
-def obtain_auth_token(request):
-    return ApiView._create_token(request.user.username)
 
 

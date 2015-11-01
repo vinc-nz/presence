@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'gatecontrol',
+    'hlcs'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -120,14 +121,19 @@ LOGGING = {
         },
     },
     'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': True,   
+        },
         'gatecontrol': {
-            'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'handlers': ['console'],
+            'level': 'ERROR',
             'propagate': True,
         },
         'hlcs': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'handlers': ['console'],
+            'level': 'ERROR',
             'propagate': True,
         },
 

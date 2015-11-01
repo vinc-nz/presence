@@ -130,12 +130,9 @@ class AtlantisModemController(ModemController):
             
 
         except Exception as e:
-            try:
-                self.serial.close()
-            except Exception:
-                pass
-            logger.exception(e)
+            self.serial.close()
             self.request.fail(str(e))
+            raise e
 
     def handle_ring(self):
         try:
@@ -151,7 +148,7 @@ class AtlantisModemController(ModemController):
                     lineIn = self.serial.readline()
                     logger.debug( 'modem: %s' % lineIn.rstrip() )
                 if lineIn == MSG_BUSY:
-                    logger.info( 'door opened' )
+                    logger.debug( 'door opened' )
                     self.request.done()
                 else:
                     msg = 'invalid input: %s' % lineIn.rstrip()

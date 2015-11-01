@@ -38,20 +38,20 @@ class HpccExternal(GateController):
         self.modem = AtlantisModem()
             
     def get_state(self):
-        return self.state
+        return HpccExternal.state
 
     def handle_request(self, access_request):
         self.controller = self.modem.get_controller()
         self.controller.setup(access_request, self.reset_state)
-        self.state = GATE_STATE_RING
+        HpccExternal.state = GATE_STATE_RING
         
     def reset_state(self):
-        self.state = GATE_STATE_UNKNOWN
+        HpccExternal.state = GATE_STATE_UNKNOWN
         
     def is_managed_by_user(self, user):
         if not user:
             return False
-        if self.state == GATE_STATE_RING:
+        if HpccExternal.state == GATE_STATE_RING:
             return False
         return True
 
@@ -69,7 +69,7 @@ class HpccInternal(GateController):
         cls.send_open_pulse = send_open_pulse
 
     def get_state(self):
-        is_open = self.magnet_input()
+        is_open = HpccInternal.magnet_input()
         return GATE_STATE_OPEN if is_open else GATE_STATE_CLOSED
 
     def _ip_is_authorized(self, address):
@@ -86,6 +86,6 @@ class HpccInternal(GateController):
         return True
 
     def handle_request(self, access_request):
-        self.send_open_pulse()
+        HpccInternal.send_open_pulse()
         access_request.done()
            

@@ -10,7 +10,6 @@ from time import sleep
 from django.conf import settings
 
 
-logger = logging.getLogger(__name__)
 
 GPIO.setmode(GPIO.BCM)
 
@@ -28,20 +27,13 @@ def setup():
 
 
 def magnet_input():
-    try:
-        return GPIO.input(MAGNET_PIN)
-    except Exception as e:
-        logger.exception(e)
-        return False
+    return GPIO.input(MAGNET_PIN)
     
 
 def send_open_pulse():
-    try:
-        GPIO.output(LOCK_PIN, PULSE_ON)
-        sleep(PULSE_SLEEP)
-        GPIO.output(LOCK_PIN, PULSE_OFF)
-    except Exception as e:
-        logger.exception(e)
+    GPIO.output(LOCK_PIN, PULSE_ON)
+    sleep(PULSE_SLEEP)
+    GPIO.output(LOCK_PIN, PULSE_OFF)
     
 
 
