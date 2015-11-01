@@ -164,6 +164,7 @@ class AtlantisModemController(ModemController):
         except Exception as e:
             logger.exception(e)
             self.request.fail(str(e))
+            self.request.client.notify_error(e)
             
         self.on_exit()
             

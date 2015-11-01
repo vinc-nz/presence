@@ -48,7 +48,7 @@ class HpccExternal(GateController):
     def reset_state(self):
         HpccExternal.state = GATE_STATE_UNKNOWN
         
-    def is_managed_by_user(self, user):
+    def is_managed_by_user(self, user, client):
         if not user:
             return False
         if HpccExternal.state == GATE_STATE_RING:
@@ -76,12 +76,12 @@ class HpccInternal(GateController):
         pattern = getattr(settings, 'IP_PATTERN', '10.87.1.\d+')
         return re.match(pattern, address)
     
-    def is_managed_by_user(self, user, ip_address):
+    def is_managed_by_user(self, user, client):
         if not user:
             return False
         if not user.is_staff():
             return False
-        if not self._ip_is_authorized(ip_address):
+        if not self._ip_is_authorized(client.request.remote_ip):
             return False
         return True
 

@@ -26,11 +26,12 @@ class Gate(models.Model):
         ControllerClass = getattr(importlib.import_module(module_name), class_name)
         return ControllerClass()
     
-    def request_opening(self, user, address):
+    def request_opening(self, user, client):
         logger.info('user %s requested access' % user.username)
         gate_controller = self.controller()
-        if gate_controller.is_managed_by_user(user, address):
-            access_request = AccessRequest( user = user, gate=self, address=address )
+        if gate_controller.is_managed_by_user(user, client):
+            access_request = AccessRequest( user = user, gate=self )
+            access_request.set_client(client)
             try:
                 gate_controller.handle_request(access_request)
                 access_request.save()
@@ -53,6 +54,11 @@ class AccessRequest(models.Model):
     info = models.TextField()
     gate = models.ForeignKey(Gate)
     address = models.TextField(null=True)
+    
+    def set_client(self, client):
+        self.client = client
+        self.address = client.request.remote_ip
+        logger.info('request from {}'.format(self.address))
 
     def done(self):
         self.req_state = REQUEST_STATE_OK
@@ -72,7 +78,7 @@ class AccessRequest(models.Model):
 
 class GateController(object):
     
-    def is_managed_by_user(self, user):
+    def is_managed_by_user(self, user, client):
         raise NotImplementedError()
     
     def get_state(self):

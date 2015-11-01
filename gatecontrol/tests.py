@@ -1,7 +1,9 @@
 from functools import partial
 from functools import partial
 import json
+from unittest.mock import MagicMock, Mock
 
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.staticfiles import testing
 from django.test.testcases import TestCase
@@ -12,7 +14,6 @@ from ws4py.client.tornadoclient import TornadoWebSocketClient
 from gatecontrol.handlers import SocketHandler, TokenHandler
 from gatecontrol.models import GateController, AccessRequest
 from gatecontrol.views import ApiView
-from django.contrib.auth import authenticate
 
 
 class GateControllerStub(GateController):
@@ -20,14 +21,14 @@ class GateControllerStub(GateController):
     def __init__(self):
         self.state = 'closed'
     
-    def is_managed_by_user(self, user, ip_address):
+    def is_managed_by_user(self, user, client):
         return True if user else False
     
     def get_state(self):
         return self.state
     
     def handle_request(self, access_request):
-        if self.is_managed_by_user(access_request.user, access_request.address):
+        if self.is_managed_by_user(access_request.user, access_request.client):
             self.state = 'open'
             return True
         return False
@@ -38,7 +39,8 @@ class TestApi(TestCase):
     fixtures = ['gates.yml', 'users.yml']
     
     def setUp(self):
-        self.view = ApiView('192.168.1.1')
+        client = Mock(request=Mock(remote_ip='192.168.1.1'))
+        self.view = ApiView(client)
     
     def test_should_return_the_list_of_gates(self):
         expected = [{

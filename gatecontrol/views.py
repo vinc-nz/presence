@@ -11,9 +11,9 @@ JWT_SECRET = getattr(settings, 'JWT_SECRET', 'secret')
 
 class ApiView:
     
-    def __init__(self, ip_address):
+    def __init__(self, client):
         self.user = None
-        self.ip_address = ip_address
+        self.client = client
         
     @staticmethod
     def _create_token(username):
@@ -31,14 +31,14 @@ class ApiView:
 
     def _serialize_gate(self, gate):
         gate_controller = gate.controller()
-        return {'id': gate.id, 'name': gate.name, 'state': gate_controller.get_state(), 'managed': gate_controller.is_managed_by_user(self.user, self.ip_address)}
+        return {'id': gate.id, 'name': gate.name, 'state': gate_controller.get_state(), 'managed': gate_controller.is_managed_by_user(self.user, self.client)}
     
     
     def list_gates(self):
         return list(map(self._serialize_gate, Gate.objects.all()))
     
     def open(self, gate_id):
-        return Gate.objects.get(id=gate_id).request_opening(self.user, self.ip_address)
+        return Gate.objects.get(id=gate_id).request_opening(self.user, self.client)
         
 
 

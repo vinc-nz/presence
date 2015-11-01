@@ -40,8 +40,12 @@ class SocketHandler(websocket.WebSocketHandler):
     
     def open(self):
         StateMonitor.clients.append(self)
-        self.api = ApiView(self.request.remote_ip)
+        self.api = ApiView(self)
         
+
+
+    def notify_error(self, e):
+        return self.write_message({'type':'error', 'content':str(e)})
 
     def _call_api_method(self, method_name, args={}):
         method = getattr(self.api, method_name)
@@ -51,7 +55,7 @@ class SocketHandler(websocket.WebSocketHandler):
             self.write_message(message)
         except Exception as e:
             logger.exception(e)
-            self.write_message({'type':'error', 'content': str(e)})
+            self.notify_error(e)
 
     def on_message(self, message):
         try:
