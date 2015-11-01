@@ -18,7 +18,6 @@ GATE_STATE_CLOSED = 'closed'
 
 class Gate(models.Model):
     name = models.CharField(max_length=100)
-    state = models.CharField(max_length=20)
     controller_class = models.CharField(max_length=100)
     
     def controller(self):

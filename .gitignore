@@ -7,5 +7,4 @@ db.*
 .pydevproject
 .project
 local_settings.py
-migrations
 admin
