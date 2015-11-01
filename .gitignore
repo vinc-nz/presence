@@ -8,3 +8,4 @@ db.*
 .project
 local_settings.py
 migrations
+admin
