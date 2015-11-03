@@ -1,5 +1,5 @@
 
-# Presence
+# Presence [![Build Status](https://travis-ci.org/sp4x/presence.svg?branch=master)](https://travis-ci.org/sp4x/presence)
 
 Home automation system for controlling doors electronically and logging accesses.
 
