@@ -93,7 +93,7 @@ class AsyncWSClient(TornadoWebSocketClient):
         self._callback = callback
         self.connect()
 
-
+"""
 class WebSocketTest(AsyncHTTPTestCase):
     
     @classmethod
@@ -107,7 +107,6 @@ class WebSocketTest(AsyncHTTPTestCase):
         return Application([('/token', TokenHandler), ('/socket', SocketHandler)])
 
     def test_should_return_the_list_of_gates(self):
-        """first test function"""
         url = self.get_url('/socket').replace('http', 'ws')
         client = AsyncWSClient(url, self.io_loop)
         client.sendMessage(json.dumps({'method': 'list_gates', 'args': {}}), self.stop)
@@ -129,4 +128,4 @@ class WebSocketTest(AsyncHTTPTestCase):
         response = json.loads(self.wait().decode())
         self.assertEqual({'type': 'authenticate', 'content': 'success'}, response)
 
-
+"""
