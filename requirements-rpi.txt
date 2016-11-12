@@ -1,0 +1,2 @@
+-r requirements.txt
+RPi.GPIO==0.5.11
