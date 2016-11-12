@@ -63,9 +63,10 @@ jQuery.timeago.settings.strings = {
 		$(label_id).text("error");
 	}
 
+	/* broken, replace with websocket
 	function openExternal() {
 		 $.ajax({
-             url: "{% url 'control' 'external' %}",
+             url: "",
              type: 'POST',
              dataType: 'json',
              success: function(){},
@@ -73,10 +74,12 @@ jQuery.timeago.settings.strings = {
 		 });
 	}
 
+
+
 	function openInternal() {
 		$("#internal-button").prop('disabled', true);
 		 $.ajax({
-            url: "{% url 'control' 'internal' %}",
+            url: "",
             type: 'POST',
             dataType: 'json',
             success: function(){},
@@ -84,7 +87,7 @@ jQuery.timeago.settings.strings = {
             	$("#internal-button").prop('disabled', false);
             }
 		 });
-	}
+	} */
 
 	function updateLabel(label_id, state) {
 		 $(label_id).removeClass("label-default");
@@ -100,10 +103,11 @@ jQuery.timeago.settings.strings = {
     		 $(label_id).addClass("label-warning");
 	}
 
+	/* broken, replace with websocket
 	function waitRing(response) {
 
 		$("#external-button").prop('disabled', true);
-		var endpoint = "{% url 'control' 'external' %}" + "?req_id=" + response.req_id;
+		var endpoint = ""
 		var interval = setInterval(function() {
 			 $.ajax({
 	             url: endpoint,
@@ -124,7 +128,7 @@ jQuery.timeago.settings.strings = {
 
 	function update() {
 		$.ajax({
-			url : "{% url 'control' 'internal' %}",
+			url : "",
 			type : 'GET',
 			dataType : 'json',
 			success : function(response) {
@@ -137,7 +141,7 @@ jQuery.timeago.settings.strings = {
 		});
 
 		$.ajax({
-			url : "{% url 'requests' 'internal' %}" + "?limit=5",
+			url : "",
 			type : 'GET',
 			dataType : 'json',
 			success : function(response) {
@@ -159,10 +163,13 @@ jQuery.timeago.settings.strings = {
 
 
 	}
+	*/
 
 	$(document).ready(function(){
 		//update();
 		//setInterval(update, 5000);
+
+		//example websocket usage, it prints to console a message when a door status changes
 
 		var ws = new WebSocket("ws://localhost:8000/socket");
 	    ws.onmessage = function(event) {

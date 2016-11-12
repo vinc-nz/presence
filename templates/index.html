@@ -17,9 +17,11 @@
     	$("#info").show();
     }
 
+
+	/* broken, use websocket
 	function update() {
 		$.ajax({
-			url : "{% url 'control' 'internal' %}",
+			url : "",
 			type : 'GET',
 			dataType : 'json',
 			success : function(response) {
@@ -33,12 +35,12 @@
 			}
 
 		});
-	}
+	}*/
 
 	$(document).ready(function(){
 		$("#info").hide();
-		update();
-		setInterval(update, 5000);
+		//update();
+		//setInterval(update, 5000);
 	});
 </script>
 
